@@ -178,7 +178,10 @@ class Planner(object):
       else:
         speed_ahead_distance = 200
       if live_map_data.liveMapData.speedLimitAheadValid and live_map_data.liveMapData.speedLimitAheadDistance < speed_ahead_distance:
-        speed_limit_ahead = live_map_data.liveMapData.speedLimitAhead
+        if speed_limit is not None:
+          speed_limit_ahead = live_map_data.liveMapData.speedLimitAhead + (speed_limit - live_map_data.liveMapData.speedLimitAhead)*live_map_data.liveMapData.speedLimitAheadDistance/speed_ahead_distance
+        else:
+          speed_limit_ahead = live_map_data.liveMapData.speedLimitAhead
         #print "Speed Ahead found"
         #print speed_limit_ahead
         v_speedlimit_ahead = speed_limit_ahead + offset
