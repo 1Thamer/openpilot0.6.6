@@ -172,14 +172,14 @@ class Planner(object):
         speed_limit = live_map_data.liveMapData.speedLimit
         v_speedlimit = speed_limit + offset
       if gasbuttonstatus == 1:
-        speed_ahead_distance = 100
+        speed_ahead_distance = 150
       elif gasbuttonstatus == 2:
-        speed_ahead_distance = 300
+        speed_ahead_distance = 350
       else:
-        speed_ahead_distance = 200
+        speed_ahead_distance = 250
       if live_map_data.liveMapData.speedLimitAheadValid and live_map_data.liveMapData.speedLimitAheadDistance < speed_ahead_distance:
-        if speed_limit is not None:
-          speed_limit_ahead = live_map_data.liveMapData.speedLimitAhead + (speed_limit - live_map_data.liveMapData.speedLimitAhead)*live_map_data.liveMapData.speedLimitAheadDistance/speed_ahead_distance
+        if speed_limit is not None and live_map_data.liveMapData.speedLimitAheadDistance > 50:
+          speed_limit_ahead = live_map_data.liveMapData.speedLimitAhead + (speed_limit - live_map_data.liveMapData.speedLimitAhead)*(live_map_data.liveMapData.speedLimitAheadDistance - 50)/(speed_ahead_distance - 50)
         else:
           speed_limit_ahead = live_map_data.liveMapData.speedLimitAhead
         #print "Speed Ahead found"
