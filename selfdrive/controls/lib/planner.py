@@ -171,6 +171,8 @@ class Planner(object):
       if live_map_data.liveMapData.speedLimitValid:
         speed_limit = live_map_data.liveMapData.speedLimit
         v_speedlimit = speed_limit + offset
+      else:
+        speed_limit = None
       if gasbuttonstatus == 1:
         speed_ahead_distance = 150
       elif gasbuttonstatus == 2:
