@@ -258,7 +258,7 @@ class Way:
         #print "max_dist break"
         break
       try:
-        if way.way.tags['junction']=='roundabout':
+        if way.way.tags['junction']=='roundabout' or way.way.tags['junction']=='circular':
           latmin = 181
           lonmin = 181
           latmax = -181
@@ -444,7 +444,7 @@ class Way:
         return way
       if len(ways) == 2:
         try:
-          if ways[0].tags['junction']=='roundabout':
+          if ways[0].tags['junction']=='roundabout' or ways[0].tags['junction']=='circular':
             #print ("roundabout found")
             way = Way(ways[0], self.query_results)
             return way
