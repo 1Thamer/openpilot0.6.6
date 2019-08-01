@@ -370,6 +370,18 @@ class Way:
                 print speed_ahead_dist
                 speed_ahead = 5/3.6
                 break
+            elif n.tags['direction'] > -0.1 and n.tags['direction'] < 360.1:
+              print n.tags['direction']
+              direction = n.tags['direction'] - heading
+              if direction < -180:
+                direction = direction + 360
+              if direction > 180:
+                direction = direction - 360
+              if abs(direction) > 90:
+                speed_ahead_dist = way_pts[count, 0] + 50
+                print speed_ahead_dist
+                speed_ahead = 5/3.6
+                break
           count += 1    
       except (KeyError, IndexError):
         pass
