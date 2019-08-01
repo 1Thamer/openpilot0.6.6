@@ -138,7 +138,14 @@ class Planner(object):
     cur_time = sec_since_boot()
     v_ego = CS.carState.vEgo
     gasbuttonstatus = CS.carState.gasbuttonstatus
-
+    
+    if gasbuttonstatus == 1:
+      speed_ahead_distance = 200
+    elif gasbuttonstatus == 2:
+      speed_ahead_distance = 400
+    else:
+      speed_ahead_distance = 300
+      
     long_control_state = live100.live100.longControlState
     v_cruise_kph = live100.live100.vCruise
     force_slow_decel = live100.live100.forceDecel
@@ -160,7 +167,7 @@ class Planner(object):
     v_speedlimit = NO_CURVATURE_SPEED
     v_curvature = NO_CURVATURE_SPEED
     v_speedlimit_ahead = NO_CURVATURE_SPEED
-    speed_ahead_distance = 300
+
 
     map_age = cur_time - rcv_times['liveMapData']
     map_valid = True #live_map_data.liveMapData.mapValid and map_age < 10.0
@@ -174,12 +181,6 @@ class Planner(object):
         v_speedlimit = speed_limit + offset
       else:
         speed_limit = None
-      if gasbuttonstatus == 1:
-        speed_ahead_distance = 200
-      elif gasbuttonstatus == 2:
-        speed_ahead_distance = 400
-      else:
-        speed_ahead_distance = 300
       if live_map_data.liveMapData.speedLimitAheadValid and live_map_data.liveMapData.speedLimitAheadDistance < speed_ahead_distance:
         if speed_limit is not None and live_map_data.liveMapData.speedLimitAheadDistance > 50:
           speed_limit_ahead = live_map_data.liveMapData.speedLimitAhead + (speed_limit - live_map_data.liveMapData.speedLimitAhead)*(live_map_data.liveMapData.speedLimitAheadDistance - 50)/(speed_ahead_distance - 50)
