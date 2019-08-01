@@ -358,16 +358,16 @@ class Way:
           if 'highway' in n.tags and n.tags['highway']=='stop':
             if backwards and (n.tags['direction']=='backward'  or n.tags['direction']=='both'):
               if way_pts[count, 0] > 0:
-                speed_ahead_dist = way_pts[count, 0]
+                speed_ahead_dist = way_pts[count, 0] + 50
                 speed_ahead = 5/3.6
                 break
             elif not backwards and (n.tags['direction']=='forward' or n.tags['direction']=='both'):
               if way_pts[count, 0] > 0:
-                speed_ahead_dist = way_pts[count, 0]
+                speed_ahead_dist = way_pts[count, 0] + 50
                 speed_ahead = 5/3.6
                 break
           count += 1    
-      except KeyError:
+      except (KeyError, IndexError):
         pass
       # Find next way
       way = way.next_way(heading)
