@@ -160,6 +160,7 @@ class Planner(object):
     v_speedlimit = NO_CURVATURE_SPEED
     v_curvature = NO_CURVATURE_SPEED
     v_speedlimit_ahead = NO_CURVATURE_SPEED
+    speed_ahead_distance = 300
 
     map_age = cur_time - rcv_times['liveMapData']
     map_valid = True #live_map_data.liveMapData.mapValid and map_age < 10.0
@@ -174,11 +175,11 @@ class Planner(object):
       else:
         speed_limit = None
       if gasbuttonstatus == 1:
-        speed_ahead_distance = 150
+        speed_ahead_distance = 200
       elif gasbuttonstatus == 2:
-        speed_ahead_distance = 350
+        speed_ahead_distance = 400
       else:
-        speed_ahead_distance = 250
+        speed_ahead_distance = 300
       if live_map_data.liveMapData.speedLimitAheadValid and live_map_data.liveMapData.speedLimitAheadDistance < speed_ahead_distance:
         if speed_limit is not None and live_map_data.liveMapData.speedLimitAheadDistance > 50:
           speed_limit_ahead = live_map_data.liveMapData.speedLimitAhead + (speed_limit - live_map_data.liveMapData.speedLimitAhead)*(live_map_data.liveMapData.speedLimitAheadDistance - 50)/(speed_ahead_distance - 50)
@@ -227,7 +228,7 @@ class Planner(object):
         accel_limits[0] = min(accel_limits[0], accel_limits[1])
         
       # Change accel limits based on time remaining to turn
-      if decel_for_turn:
+      if decel_for_turn and live_map_data.liveMapData.distToTurn < speed_ahead_distance:
         time_to_turn = max(1.0, live_map_data.liveMapData.distToTurn / max((v_ego + v_curvature)/2, 1.))
         required_decel = min(0, (v_curvature - v_ego) / time_to_turn*0.85)
         accel_limits[0] = max(accel_limits[0], required_decel)
