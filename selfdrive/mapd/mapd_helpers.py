@@ -354,6 +354,7 @@ class Way:
         pass
       try:
         count = 0
+        loop_must_break = False
         for n in self.way.nodes:
           if 'highway' in n.tags and n.tags['highway']=='stop':
             if backwards and (n.tags['direction']=='backward'  or n.tags['direction']=='both'):
@@ -362,6 +363,7 @@ class Way:
                 speed_ahead_dist = way_pts[count, 0] + 50
                 print speed_ahead_dist
                 speed_ahead = 5/3.6
+                loop_must_break = True
                 break
             elif not backwards and (n.tags['direction']=='forward' or n.tags['direction']=='both'):
               print "forward"
@@ -369,6 +371,7 @@ class Way:
                 speed_ahead_dist = way_pts[count, 0] + 50
                 print speed_ahead_dist
                 speed_ahead = 5/3.6
+                loop_must_break = True
                 break
             elif n.tags['direction'] > -0.1 and n.tags['direction'] < 360.1:
               print n.tags['direction']
@@ -381,8 +384,10 @@ class Way:
                 speed_ahead_dist = way_pts[count, 0] + 50
                 print speed_ahead_dist
                 speed_ahead = 5/3.6
+                loop_must_break = True
                 break
-          count += 1    
+          count += 1
+        if loop_must_break: break
       except (KeyError, IndexError):
         pass
       # Find next way
