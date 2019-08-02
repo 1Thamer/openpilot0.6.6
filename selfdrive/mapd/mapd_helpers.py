@@ -374,7 +374,7 @@ class Way:
                 loop_must_break = True
                 break
             try:
-              elif int(n.tags['direction']) > -0.1 and int(n.tags['direction']) < 360.1:
+              if int(n.tags['direction']) > -0.1 and int(n.tags['direction']) < 360.1:
                 print int(n.tags['direction'])
                 direction = int(n.tags['direction']) - heading
                 if direction < -180:
