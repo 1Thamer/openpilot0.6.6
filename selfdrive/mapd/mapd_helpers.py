@@ -360,7 +360,7 @@ class Way:
             if backwards and (n.tags['direction']=='backward'  or n.tags['direction']=='both'):
               print "backward"
               if way_pts[count, 0] > 0:
-                speed_ahead_dist = way_pts[count, 0] + 50
+                speed_ahead_dist = way_pts[count, 0]
                 print speed_ahead_dist
                 speed_ahead = 5/3.6
                 loop_must_break = True
@@ -368,20 +368,20 @@ class Way:
             elif not backwards and (n.tags['direction']=='forward' or n.tags['direction']=='both'):
               print "forward"
               if way_pts[count, 0] > 0:
-                speed_ahead_dist = way_pts[count, 0] + 50
+                speed_ahead_dist = way_pts[count, 0]
                 print speed_ahead_dist
                 speed_ahead = 5/3.6
                 loop_must_break = True
                 break
-            elif n.tags['direction'] > -0.1 and n.tags['direction'] < 360.1:
-              print n.tags['direction']
-              direction = n.tags['direction'] - heading
+            elif int(n.tags['direction']) > -0.1 and int(n.tags['direction']) < 360.1:
+              print int(n.tags['direction'])
+              direction = int(n.tags['direction']) - heading
               if direction < -180:
                 direction = direction + 360
               if direction > 180:
                 direction = direction - 360
-              if abs(direction) > 90:
-                speed_ahead_dist = way_pts[count, 0] + 50
+              if abs(direction) > 135:
+                speed_ahead_dist = way_pts[count, 0]
                 print speed_ahead_dist
                 speed_ahead = 5/3.6
                 loop_must_break = True
