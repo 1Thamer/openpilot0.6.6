@@ -373,22 +373,25 @@ class Way:
                 speed_ahead = 5/3.6
                 loop_must_break = True
                 break
-            elif int(n.tags['direction']) > -0.1 and int(n.tags['direction']) < 360.1:
-              print int(n.tags['direction'])
-              direction = int(n.tags['direction']) - heading
-              if direction < -180:
-                direction = direction + 360
-              if direction > 180:
-                direction = direction - 360
-              if abs(direction) > 135:
-                speed_ahead_dist = way_pts[count, 0]
-                print speed_ahead_dist
-                speed_ahead = 5/3.6
-                loop_must_break = True
-                break
+            try:
+              elif int(n.tags['direction']) > -0.1 and int(n.tags['direction']) < 360.1:
+                print int(n.tags['direction'])
+                direction = int(n.tags['direction']) - heading
+                if direction < -180:
+                  direction = direction + 360
+                if direction > 180:
+                  direction = direction - 360
+                if abs(direction) > 135:
+                  speed_ahead_dist = way_pts[count, 0]
+                  print speed_ahead_dist
+                  speed_ahead = 5/3.6
+                  loop_must_break = True
+                  break
+            except ValueError:
+              pass
           count += 1
         if loop_must_break: break
-      except (KeyError, IndexError):
+      except (KeyError, IndexError, ValueError):
         pass
       # Find next way
       way = way.next_way(heading)
