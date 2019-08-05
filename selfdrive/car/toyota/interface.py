@@ -300,8 +300,8 @@ class CarInterface(object):
     ret.steerMaxV = [1., 1.]  # 2/3rd torque allowed above 45 kph
     ret.gasMaxBP = [0., 9., 35.]
     #ret.gasMaxV = [0.2, 0.5, 0.7]
-    ret.brakeMaxBP = [5., 20.]
-    ret.brakeMaxV = [1., 0.8]
+    ret.brakeMaxBP = [0., 35.]
+    ret.brakeMaxV = [0.9, 0.8]
 
     ret.enableCamera = not check_ecu_msgs(fingerprint, ECU.CAM)
     ret.enableDsu = not check_ecu_msgs(fingerprint, ECU.DSU)
