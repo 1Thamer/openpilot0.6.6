@@ -140,11 +140,11 @@ class Planner(object):
     gasbuttonstatus = CS.carState.gasbuttonstatus
     
     if gasbuttonstatus == 1:
-      speed_ahead_distance = 150
+      speed_ahead_distance = 100
     elif gasbuttonstatus == 2:
-      speed_ahead_distance = 350
+      speed_ahead_distance = 300
     else:
-      speed_ahead_distance = 250
+      speed_ahead_distance = 200
       
     long_control_state = live100.live100.longControlState
     v_cruise_kph = live100.live100.vCruise
@@ -185,6 +185,15 @@ class Planner(object):
         distanceatlowlimit = 50
         if live_map_data.liveMapData.speedLimitAhead < 11/3.6:
           distanceatlowlimit = 0
+          if v_ego > live_map_data.liveMapData.speedLimitAhead + 60/3.6:
+            speed_ahead_distance = 300
+          elif v_ego > live_map_data.liveMapData.speedLimitAhead + 40/3.6:
+            speed_ahead_distance = 200
+          elif v_ego > live_map_data.liveMapData.speedLimitAhead + 20/3.6:
+            speed_ahead_distance = 100
+          else:
+            speed_ahead_distance = 50
+          
         if speed_limit is not None:
           if v_ego + 20/3.6 > live_map_data.liveMapData.speedLimitAhead + (speed_limit - live_map_data.liveMapData.speedLimitAhead)*(live_map_data.liveMapData.speedLimitAheadDistance - 50)/(speed_ahead_distance - 50):
             distanceatlowlimit = 100
