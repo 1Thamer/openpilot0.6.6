@@ -185,7 +185,8 @@ class Planner(object):
         distanceatlowlimit = 50
         if live_map_data.liveMapData.speedLimitAhead < 11/3.6:
           distanceatlowlimit = speed_ahead_distance = (v_ego - live_map_data.liveMapData.speedLimitAhead)*3.6*2
-          distanceatlowlimit = max(distanceatlowlimit,0)
+          if distanceatlowlimit < 50:
+            distanceatlowlimit = 0
           distanceatlowlimit = min(distanceatlowlimit,100)
           speed_ahead_distance = (v_ego - live_map_data.liveMapData.speedLimitAhead)*3.6*5
           speed_ahead_distance = min(speed_ahead_distance,300)
