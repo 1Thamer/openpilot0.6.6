@@ -140,11 +140,11 @@ class Planner(object):
     gasbuttonstatus = CS.carState.gasbuttonstatus
     
     if gasbuttonstatus == 1:
-      speed_ahead_distance = 100
+      speed_ahead_distance = 150
     elif gasbuttonstatus == 2:
-      speed_ahead_distance = 300
+      speed_ahead_distance = 350
     else:
-      speed_ahead_distance = 200
+      speed_ahead_distance = 250
       
     long_control_state = live100.live100.longControlState
     v_cruise_kph = live100.live100.vCruise
@@ -184,7 +184,9 @@ class Planner(object):
       if live_map_data.liveMapData.speedLimitAheadValid and live_map_data.liveMapData.speedLimitAheadDistance < speed_ahead_distance:
         distanceatlowlimit = 50
         if live_map_data.liveMapData.speedLimitAhead < 11/3.6:
-          distanceatlowlimit = 0
+          distanceatlowlimit = speed_ahead_distance = (v_ego - live_map_data.liveMapData.speedLimitAhead)*3.6*2
+          distanceatlowlimit = max(distanceatlowlimit,0)
+          distanceatlowlimit = min(distanceatlowlimit,100)
           speed_ahead_distance = (v_ego - live_map_data.liveMapData.speedLimitAhead)*3.6*5
           speed_ahead_distance = min(speed_ahead_distance,300)
           speed_ahead_distance = max(speed_ahead_distance,50)
@@ -241,13 +243,13 @@ class Planner(object):
       # Change accel limits based on time remaining to turn
       if decel_for_turn and live_map_data.liveMapData.distToTurn < speed_ahead_distance:
         time_to_turn = max(1.0, live_map_data.liveMapData.distToTurn / max((v_ego + v_curvature)/2, 1.))
-        required_decel = min(0, (v_curvature - v_ego) / time_to_turn*0.85)
+        required_decel = min(0, (v_curvature - v_ego) / time_to_turn)
         accel_limits[0] = max(accel_limits[0], required_decel)
         
       if v_speedlimit_ahead < v_speedlimit:
         if live_map_data.liveMapData.speedLimitAheadDistance != 0:
           required_decel = min(0, (v_speedlimit_ahead*v_speedlimit_ahead - v_ego*v_ego)/(live_map_data.liveMapData.speedLimitAheadDistance*2))
-        required_decel = max(required_decel*0.85, -3.0)
+        required_decel = max(required_decel, -3.0)
         #print "required_decel"
         #print required_decel
         #print "accel_limits 0"
