@@ -183,14 +183,14 @@ class Planner(object):
         speed_limit = None
       if live_map_data.liveMapData.speedLimitAheadValid and live_map_data.liveMapData.speedLimitAheadDistance < speed_ahead_distance:
         distanceatlowlimit = 50
-        #if live_map_data.liveMapData.speedLimitAhead < 21/3.6:
-        #  distanceatlowlimit = speed_ahead_distance = (v_ego - live_map_data.liveMapData.speedLimitAhead)*3.6*2
-        #  if distanceatlowlimit < 50:
-        #    distanceatlowlimit = 0
-        #  distanceatlowlimit = min(distanceatlowlimit,100)
-        #  speed_ahead_distance = (v_ego - live_map_data.liveMapData.speedLimitAhead)*3.6*5
-        #  speed_ahead_distance = min(speed_ahead_distance,300)
-        #  speed_ahead_distance = max(speed_ahead_distance,50)
+        if live_map_data.liveMapData.speedLimitAhead < 21/3.6:
+          distanceatlowlimit = speed_ahead_distance = (v_ego - live_map_data.liveMapData.speedLimitAhead)*3.6*2
+          if distanceatlowlimit < 50:
+            distanceatlowlimit = 0
+          distanceatlowlimit = min(distanceatlowlimit,100)
+          speed_ahead_distance = (v_ego - live_map_data.liveMapData.speedLimitAhead)*3.6*5
+          speed_ahead_distance = min(speed_ahead_distance,300)
+          speed_ahead_distance = max(speed_ahead_distance,50)
           
         #if speed_limit is not None:
         #  if v_ego + 20/3.6 > live_map_data.liveMapData.speedLimitAhead + (speed_limit - live_map_data.liveMapData.speedLimitAhead)*(live_map_data.liveMapData.speedLimitAheadDistance)/(speed_ahead_distance):
