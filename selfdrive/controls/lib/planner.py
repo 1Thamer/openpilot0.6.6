@@ -246,6 +246,8 @@ class Planner(object):
         time_to_turn = max(1.0, live_map_data.liveMapData.distToTurn / max((v_ego + v_curvature)/2, 1.))
         required_decel = min(0, (v_curvature - v_ego) / time_to_turn)
         accel_limits[0] = max(accel_limits[0], required_decel)
+        print "required turn decel"
+        print required_decel
         
       if v_speedlimit_ahead < v_speedlimit:
         if live_map_data.liveMapData.speedLimitAheadDistance != 0:
@@ -258,6 +260,8 @@ class Planner(object):
         #print "accel_limits 1"
         #print accel_limits[1]
         accel_limits[0] = min(accel_limits[0], required_decel)
+        print "required decel speed"
+        print required_decel
         
       self.v_cruise, self.a_cruise = speed_smoother(self.v_acc_start, self.a_acc_start,
                                                     v_cruise_setpoint,
