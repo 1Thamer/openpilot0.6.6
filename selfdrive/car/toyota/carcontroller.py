@@ -17,7 +17,7 @@ AudibleAlert = car.CarControl.HUDControl.AudibleAlert
 
 # Accel limits
 ACCEL_HYST_GAP = 0.02  # don't change accel command for small oscilalitons within this value
-ACCEL_MAX = 3.5  # 3.5 m/s2
+ACCEL_MAX = 3.0  # 3.0 m/s2
 ACCEL_MIN = -3.0 # 3   m/s2
 ACCEL_SCALE = max(ACCEL_MAX, -ACCEL_MIN)
 
@@ -171,10 +171,8 @@ class CarController(object):
       apply_accel = actuators.gas - actuators.brake
 
     apply_accel, self.accel_steady = accel_hysteresis(apply_accel, self.accel_steady, enabled)
-    if apply_accel < 0:
-      apply_accel = -clip((-apply_accel) ** 2 * ACCEL_SCALE, ACCEL_MIN, ACCEL_MAX)
-    else:
-      apply_accel = clip(apply_accel * ACCEL_SCALE, ACCEL_MIN, ACCEL_MAX)
+    
+    apply_accel = clip(apply_accel * ACCEL_SCALE, ACCEL_MIN, ACCEL_MAX)
     # Get the angle from ALCA.
     alca_enabled = False
     alca_steer = 0.
