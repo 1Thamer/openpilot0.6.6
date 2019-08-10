@@ -62,12 +62,19 @@ def parse_speed_tags(tags):
       cond = cond[1:-1]
 
       start, end = cond.split('-')
+      starthour, startminute = start.split(':')
+      endhour, endminute = end.split(':')
       now = datetime.now()  # TODO: Get time and timezone from gps fix so this will work correctly on replays
       start = datetime.strptime(start, "%H:%M").replace(year=now.year, month=now.month, day=now.day)
-      end = datetime.strptime(end, "%H:%M").replace(year=now.year, month=now.month, day=now.day)
-
-      if start <= now <= end:
-        max_speed = max_speed_cond
+      midnight = datetime.strptime("00:00", "%H:%M").replace(year=now.year, month=now.month, day=now.day)
+      end1 = datetime.strptime(end, "%H:%M").replace(year=now.year, month=now.month, day=now.day)
+      if int(endhour) + int(endminute)/60 < int(starthour) + int(startminute)/60:
+        end2 = datetime.strptime(end, "%H:%M").replace(year=now.year, month=now.month, day=now.day+1)
+        if start <= now <= end2 or midnight <= now <= end1:
+          max_speed = max_speed_cond
+      else:
+        if start <= now <= end1:
+          max_speed = max_speed_cond
     except ValueError:
       pass
 
