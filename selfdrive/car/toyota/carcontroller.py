@@ -171,8 +171,13 @@ class CarController(object):
       apply_accel = actuators.gas - actuators.brake
 
     apply_accel, self.accel_steady = accel_hysteresis(apply_accel, self.accel_steady, enabled)
-    
-    apply_accel = clip(apply_accel * ACCEL_SCALE, ACCEL_MIN, ACCEL_MAX)
+    if apply_accel < 0:
+      if CS.v_ego < 15/3.6:
+        apply_accel = -clip((-apply_accel) ** 3 * ACCEL_SCALE, ACCEL_MIN, ACCEL_MAX)
+      else:
+        apply_accel = -clip((-apply_accel) ** 4 * ACCEL_SCALE, ACCEL_MIN, ACCEL_MAX)
+    else:
+      apply_accel = clip(apply_accel * ACCEL_SCALE, ACCEL_MIN, ACCEL_MAX)
     # Get the angle from ALCA.
     alca_enabled = False
     alca_steer = 0.
