@@ -45,7 +45,7 @@ class CarInterface(object):
   @staticmethod
   def compute_gb(accel, speed):
     if accel<0:
-      return -(float(-accel)/3.0)**4
+      return -(float(-accel)/3.0)
     else:
       return float(accel) / 3.0
 
