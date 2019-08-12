@@ -140,9 +140,9 @@ class Planner(object):
     gasbuttonstatus = CS.carState.gasbuttonstatus
     
     if gasbuttonstatus == 1:
-      speed_ahead_distance = 150
+      speed_ahead_distance = 100
     elif gasbuttonstatus == 2:
-      speed_ahead_distance = 350
+      speed_ahead_distance = 400
     else:
       speed_ahead_distance = 250
       
