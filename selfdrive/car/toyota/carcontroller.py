@@ -342,7 +342,7 @@ class CarController(object):
     if (frame % 3 == 0 and ECU.DSU in self.fake_ecus) or (pcm_cancel_cmd and ECU.CAM in self.fake_ecus):
       lead = lead or CS.v_ego < 12.    # at low speed we always assume the lead is present do ACC can be engaged
       if ECU.DSU in self.fake_ecus:
-        if enable:
+        if enabled:
           print "actual decel"
           print apply_accel
           try:
