@@ -44,10 +44,7 @@ class CarInterface(object):
 
   @staticmethod
   def compute_gb(accel, speed):
-    if accel<0:
-      return -(float(-accel)/3.0)
-    else:
-      return float(accel) / 3.0
+    return float(accel) / 3.0
 
   @staticmethod
   def calc_accel_override(a_ego, a_target, v_ego, v_target):
@@ -97,8 +94,8 @@ class CarInterface(object):
     else:
       ret.gasMaxBP = [0.]
       ret.gasMaxV = [0.5]
-      ret.longitudinalTuning.kpV = [0.5, 0.5, 0.5]  # braking tune from rav4h
-      ret.longitudinalTuning.kiV = [0.01, 0.001]
+      ret.longitudinalTuning.kpV = [0.01, 0.01, 0.01]  # braking tune from rav4h
+      ret.longitudinalTuning.kiV = [0.0001, 0.0001]
 
     ret.steerActuatorDelay = 0.12  # Default delay, Prius has larger delay
     if candidate != CAR.PRIUS:
