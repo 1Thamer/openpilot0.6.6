@@ -17,6 +17,7 @@ from selfdrive.swaglog import cloudlog
 from selfdrive.loggerd.config import ROOT
 from selfdrive.data_collection import df_uploader
 from selfdrive.data_collection import gps_uploader
+from selfdrive.data_collection import braking_uploader
 
 from common.params import Params
 from common.api import api_get
@@ -278,6 +279,10 @@ def uploader_fn(exit_event):
     last_gps_size = os.path.getsize("/data/openpilot/selfdrive/data_collection/gps-data")
   except:
     last_gps_size = None
+  try:
+    last_braking_size = os.path.getsize("/data/openpilot/selfdrive/data_collection/braking-data")
+  except:
+    last_braking_size = None
   while True:
     allow_cellular = (params.get("IsUploadVideoOverCellularEnabled") != "0")
     on_hotspot = is_on_hotspot()
@@ -295,7 +300,11 @@ def uploader_fn(exit_event):
           gps_uploader.upload_data()
       except:
         pass
-
+      try:
+        if last_braking_size == os.path.getsize("/data/openpilot/selfdrive/data_collection/braking-data"):
+          braking_uploader.upload_data()
+      except:
+        pass
     try:
       last_df_size = os.path.getsize("/data/openpilot/selfdrive/data_collection/df-data")
     except:
@@ -304,7 +313,10 @@ def uploader_fn(exit_event):
       last_gps_size = os.path.getsize("/data/openpilot/selfdrive/data_collection/gps-data")
     except:
       last_gps_size = None
-
+    try:
+      last_braking_size = os.path.getsize("/data/openpilot/selfdrive/data_collection/braking-data")
+    except:
+      last_braking_size = None
     if exit_event.is_set():
       return
 
