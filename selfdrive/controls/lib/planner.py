@@ -263,7 +263,8 @@ class Planner(object):
         #print accel_limits[0]
         #print "accel_limits 1"
         #print accel_limits[1]
-        accel_limits[0] = min(accel_limits[0], required_decel)
+        accel_limits[0] = required_decel
+        accel_limits[1] = required_decel
         print "required decel speed"
         print required_decel
         
