@@ -168,11 +168,11 @@ class LongControl(object):
       print "output_gb"
       print output_gb
       print "pid.p"
-      self.pid.p
+      print self.pid.p
       print "pid.i"
-      self.pid.i
+      print self.pid.i
       print "pid.f"
-      self.pid.f
+      print self.pid.f
       if prevent_overshoot:
         output_gb = min(output_gb, 0.0)
 
