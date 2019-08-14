@@ -272,6 +272,11 @@ class Planner(object):
                                                     accel_limits[1], accel_limits[0],
                                                     jerk_limits[1], jerk_limits[0],
                                                     _DT_MPC)
+      print "after speed_smoother"
+      print "v_cruise"
+      print self.v_cruise
+      print "a_cruise"
+      print self.a_cruise
       # cruise speed can't be negative even is user is distracted
       self.v_cruise = max(self.v_cruise, 0.)
     else:
