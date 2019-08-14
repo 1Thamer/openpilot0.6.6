@@ -167,12 +167,7 @@ class LongControl(object):
       output_gb = self.pid.update(self.v_pid, v_ego_pid, speed=v_ego_pid, deadzone=deadzone, feedforward=a_target, freeze_integrator=prevent_overshoot)
       print "output_gb"
       print output_gb
-      print "pid.p"
-      print self.pid.p
-      print "pid.i"
-      print self.pid.i
-      print "pid.f"
-      print self.pid.f
+      
       if prevent_overshoot:
         output_gb = min(output_gb, 0.0)
 
