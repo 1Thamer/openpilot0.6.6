@@ -129,8 +129,12 @@ class Planner(object):
       elif slowest == 'cruise':
         self.v_acc = self.v_cruise
         self.a_acc = self.a_cruise
+    print "slowest"
+    print slowest
 
     self.v_acc_future = min([self.mpc1.v_mpc_future, self.mpc2.v_mpc_future, v_cruise_setpoint])
+    print "v_acc_future"
+    print self.v_acc_future
 
 
   def update(self, rcv_times, CS, CP, VM, PP, live20, live100, md, live_map_data):
