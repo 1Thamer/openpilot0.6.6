@@ -250,6 +250,7 @@ class Planner(object):
         time_to_turn = max(1.0, live_map_data.liveMapData.distToTurn / max((v_ego + v_curvature)/2, 1.))
         required_decel = min(0, (v_curvature - v_ego) / time_to_turn)
         accel_limits[0] = max(accel_limits[0], required_decel)
+        
         print "required turn decel"
         print required_decel
         
@@ -265,6 +266,7 @@ class Planner(object):
         #print accel_limits[1]
         accel_limits[0] = required_decel
         accel_limits[1] = required_decel
+        self.a_acc_start = required_decel
         print "required decel speed"
         print required_decel
         
