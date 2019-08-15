@@ -425,8 +425,6 @@ class CarState(object):
     else:
       angle_later = 0
     self.a_ego = float(v_ego_x[1])
-    print "a_ego"
-    print self.a_ego
     self.standstill = not v_wheel > 0.001
 
     if self.CP.carFingerprint == CAR.OLD_CAR:
