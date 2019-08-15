@@ -129,12 +129,12 @@ class Planner(object):
       elif slowest == 'cruise':
         self.v_acc = self.v_cruise
         self.a_acc = self.a_cruise
-      print "slowest"
-      print slowest
+      #print "slowest"
+      #print slowest
 
     self.v_acc_future = min([self.mpc1.v_mpc_future, self.mpc2.v_mpc_future, v_cruise_setpoint])
-    print "v_acc_future"
-    print self.v_acc_future
+    #print "v_acc_future"
+    #print self.v_acc_future
 
 
   def update(self, rcv_times, CS, CP, VM, PP, live20, live100, md, live_map_data):
@@ -251,8 +251,8 @@ class Planner(object):
         required_decel = min(0, (v_curvature - v_ego) / time_to_turn)
         accel_limits[0] = max(accel_limits[0], required_decel)
         
-        print "required turn decel"
-        print required_decel
+        #print "required turn decel"
+        #print required_decel
         
       if v_speedlimit_ahead < v_speedlimit:
         if live_map_data.liveMapData.speedLimitAheadDistance != 0:
@@ -267,17 +267,17 @@ class Planner(object):
         accel_limits[0] = required_decel
         accel_limits[1] = required_decel
         self.a_acc_start = required_decel
-        print "required decel speed"
-        print required_decel
+        #print "required decel speed"
+        #print required_decel
         
       self.v_cruise, self.a_cruise = speed_smoother(self.v_acc_start, self.a_acc_start,
                                                     v_cruise_setpoint,
                                                     accel_limits[1], accel_limits[0],
                                                     jerk_limits[1], jerk_limits[0],
                                                     _DT_MPC)
-      print "after speed_smoother"
-      print "v_cruise"
-      print self.v_cruise
+      #print "after speed_smoother"
+      #print "v_cruise"
+      #print self.v_cruise
       print "a_cruise"
       print self.a_cruise
       # cruise speed can't be negative even is user is distracted
@@ -363,3 +363,5 @@ class Planner(object):
     v_acc_sol = self.v_acc_start + dt * (a_acc_sol + self.a_acc_start) / 2.0
     self.v_acc_start = v_acc_sol
     self.a_acc_start = a_acc_sol
+    print "a_acc_start"
+    print a_acc_sol
