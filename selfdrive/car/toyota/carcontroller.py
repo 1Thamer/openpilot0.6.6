@@ -1,4 +1,3 @@
-import time
 from cereal import car
 from common.numpy_fast import clip, interp
 from selfdrive.boardd.boardd import can_list_to_can_capnp
@@ -339,12 +338,6 @@ class CarController(object):
         if enabled:
           print "actual decel"
           print apply_accel
-          try:
-            location = [apply_accel, CS.v_ego, CS.a_ego, time.time()]
-            with open("/data/openpilot/selfdrive/data_collection/braking-data", "a") as f:
-              f.write("{}\n".format(location))
-          except:
-            pass
         can_sends.append(create_accel_command(self.packer, apply_accel, pcm_cancel_cmd, self.standstill_req, lead, distance))
       else:
         can_sends.append(create_accel_command(self.packer, 0, pcm_cancel_cmd, False, lead, distance))
