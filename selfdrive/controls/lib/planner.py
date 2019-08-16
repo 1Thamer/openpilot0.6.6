@@ -332,13 +332,13 @@ class Planner(object):
     plan_send.plan.vCruise = self.v_cruise
     plan_send.plan.aCruise = self.a_cruise
     plan_send.plan.vStart = self.v_acc_start
-    plan_send.plan.aStart = self.a_acc_start
+    plan_send.plan.aStart = round(self.a_acc_start, 5)
     print "aStart from planner"
     print self.a_acc_start
     print "aTarget from Planner"
     print self.a_acc
     plan_send.plan.vTarget = self.v_acc
-    plan_send.plan.aTarget = self.a_acc
+    plan_send.plan.aTarget = round(self.a_acc, 5)
     plan_send.plan.vTargetFuture = self.v_acc_future
     plan_send.plan.hasLead = self.mpc1.prev_lead_status
     plan_send.plan.hasrightLaneDepart = bool(PP.r_poly[3] > -1.1 and not CS.carState.rightBlinker)
