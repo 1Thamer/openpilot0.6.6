@@ -64,7 +64,7 @@ class LongControl(object):
     self.long_control_state = LongCtrlState.off  # initialized to off
     self.pid = PIController((CP.longitudinalTuning.kpBP, CP.longitudinalTuning.kpV),
                             (CP.longitudinalTuning.kiBP, CP.longitudinalTuning.kiV),
-                            k_f=1.0,
+                            k_f=0.9,
                             rate=RATE,
                             sat_limit=0.8,
                             convert=compute_gb)
@@ -176,7 +176,7 @@ class LongControl(object):
         self.lastdecelForTurn = False
         self.pid._k_p = (CP.longitudinalTuning.kpBP, CP.longitudinalTuning.kpV)
         self.pid._k_i = (CP.longitudinalTuning.kiBP, CP.longitudinalTuning.kiV)
-        self.pid.k_f=1.0
+        self.pid.k_f=0.9
         
       output_gb = self.pid.update(self.v_pid, v_ego_pid, speed=v_ego_pid, deadzone=deadzone, feedforward=a_target, freeze_integrator=prevent_overshoot)
       print "output_gb"
