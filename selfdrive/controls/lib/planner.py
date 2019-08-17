@@ -278,8 +278,8 @@ class Planner(object):
       #print "after speed_smoother"
       #print "v_cruise"
       #print self.v_cruise
-      print "a_cruise"
-      print self.a_cruise
+      #print "a_cruise"
+      #print self.a_cruise
       # cruise speed can't be negative even is user is distracted
       self.v_cruise = max(self.v_cruise, 0.)
     else:
@@ -333,10 +333,10 @@ class Planner(object):
     plan_send.plan.aCruise = float(self.a_cruise)
     plan_send.plan.vStart = float(self.v_acc_start)
     plan_send.plan.aStart = float(self.a_acc_start)
-    print "aStart from planner"
-    print self.a_acc_start
-    print "aTarget from Planner"
-    print self.a_acc
+    #print "aStart from planner"
+    #print self.a_acc_start
+    #print "aTarget from Planner"
+    #print self.a_acc
     plan_send.plan.vTarget = float(self.v_acc)
     plan_send.plan.aTarget = float(self.a_acc)
     plan_send.plan.vTargetFuture = float(self.v_acc_future)
@@ -367,5 +367,5 @@ class Planner(object):
     v_acc_sol = self.v_acc_start + dt * (a_acc_sol + self.a_acc_start) / 2.0
     self.v_acc_start = v_acc_sol
     self.a_acc_start = a_acc_sol
-    print "a_acc_start"
-    print a_acc_sol
+    #print "a_acc_start"
+    #print a_acc_sol
