@@ -255,7 +255,7 @@ class Planner(object):
         #print required_decel
         
       if v_speedlimit_ahead < v_speedlimit:
-        if live_map_data.liveMapData.speedLimitAheadDistance > 10:
+        if live_map_data.liveMapData.speedLimitAheadDistance > 1:
           required_decel = min(0, (v_speedlimit_ahead*v_speedlimit_ahead - v_ego*v_ego)/(live_map_data.liveMapData.speedLimitAheadDistance*2))
           required_decel = max(required_decel, -3.0)
           #print "required_decel"
