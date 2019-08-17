@@ -257,18 +257,18 @@ class Planner(object):
       if v_speedlimit_ahead < v_speedlimit:
         if live_map_data.liveMapData.speedLimitAheadDistance > 10:
           required_decel = min(0, (v_speedlimit_ahead*v_speedlimit_ahead - v_ego*v_ego)/(live_map_data.liveMapData.speedLimitAheadDistance*2))
-        required_decel = max(required_decel, -3.0)
-        #print "required_decel"
-        #print required_decel
-        #print "accel_limits 0"
-        #print accel_limits[0]
-        #print "accel_limits 1"
-        #print accel_limits[1]
-        accel_limits[0] = required_decel
-        accel_limits[1] = required_decel
-        self.a_acc_start = required_decel
-        #print "required decel speed"
-        #print required_decel
+          required_decel = max(required_decel, -3.0)
+          #print "required_decel"
+          #print required_decel
+          #print "accel_limits 0"
+          #print accel_limits[0]
+          #print "accel_limits 1"
+          #print accel_limits[1]
+          accel_limits[0] = required_decel
+          accel_limits[1] = required_decel
+          self.a_acc_start = required_decel
+          #print "required decel speed"
+          #print required_decel
         
       self.v_cruise, self.a_cruise = speed_smoother(self.v_acc_start, self.a_acc_start,
                                                     v_cruise_setpoint,
