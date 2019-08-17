@@ -261,10 +261,10 @@ def state_control(rcv_times, plan, path_plan, CS, CP, state, events, v_cruise_kp
   _DT = 0.01 # 100Hz
 
   dt = min(cur_time - radar_time, _DT_MPC + _DT) + _DT  # no greater than dt mpc + dt, to prevent too high extraps
-  print "plan.aTarget"
-  print plan.aTarget
-  print "plan.aStart"
-  print plan.aStart
+  #print "plan.aTarget"
+  #print plan.aTarget
+  #print "plan.aStart"
+  #print plan.aStart
   a_acc_sol = plan.aStart + (dt / _DT_MPC) * (plan.aTarget - plan.aStart)
   v_acc_sol = plan.vStart + dt * (a_acc_sol + plan.aStart) / 2.0
 
