@@ -121,7 +121,7 @@ class LongControl(object):
     return round(max(min(accel, max_return), min_return), 5)  # ensure we return a value between range
 
   def update(self, active, v_ego, brake_pressed, standstill, cruise_standstill, v_cruise, v_target, v_target_future,
-             a_target, CP, gasinterceptor, gasbuttonstatus, decelForTurn):
+             a_target, CP, gasinterceptor, gasbuttonstatus, decelForTurn, longitudinalPlanSource):
     """Update longitudinal control. This updates the state machine and runs a PID loop"""
     # Actuation limits
     l20 = None
@@ -165,14 +165,19 @@ class LongControl(object):
       deadzone = interp(v_ego_pid, CP.longitudinalTuning.deadzoneBP, CP.longitudinalTuning.deadzoneV)
       print "a_target"
       print a_target
-      
-      if decelForTurn and not self.lastdecelForTurn:
-        self.lastdecelForTurn = True
-        self.pid._k_p = (CP.longitudinalTuning.kpBP, [x * 0 for x in CP.longitudinalTuning.kpV])
-        self.pid._k_i = (CP.longitudinalTuning.kiBP, [x * 0 for x in CP.longitudinalTuning.kiV])
-        self.pid.i = 0.0
-        self.pid.k_f=1.0
-      if self.lastdecelForTurn and not decelForTurn:
+      if longitudinalPlanSource == 'cruise':
+        if decelForTurn and not self.lastdecelForTurn:
+          self.lastdecelForTurn = True
+          self.pid._k_p = (CP.longitudinalTuning.kpBP, [x * 0 for x in CP.longitudinalTuning.kpV])
+          self.pid._k_i = (CP.longitudinalTuning.kiBP, [x * 0 for x in CP.longitudinalTuning.kiV])
+          self.pid.i = 0.0
+          self.pid.k_f=1.0
+        if self.lastdecelForTurn and not decelForTurn:
+          self.lastdecelForTurn = False
+          self.pid._k_p = (CP.longitudinalTuning.kpBP, CP.longitudinalTuning.kpV)
+          self.pid._k_i = (CP.longitudinalTuning.kiBP, CP.longitudinalTuning.kiV)
+          self.pid.k_f=0.9
+      else:
         self.lastdecelForTurn = False
         self.pid._k_p = (CP.longitudinalTuning.kpBP, CP.longitudinalTuning.kpV)
         self.pid._k_i = (CP.longitudinalTuning.kiBP, CP.longitudinalTuning.kiV)
