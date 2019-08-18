@@ -17,7 +17,6 @@ from selfdrive.swaglog import cloudlog
 from selfdrive.loggerd.config import ROOT
 from selfdrive.data_collection import df_uploader
 from selfdrive.data_collection import gps_uploader
-from selfdrive.data_collection import braking_uploader
 
 from common.params import Params
 from common.api import api_get
