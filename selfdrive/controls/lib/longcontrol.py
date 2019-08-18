@@ -163,8 +163,8 @@ class LongControl(object):
       # Freeze the integrator so we don't accelerate to compensate, and don't allow positive acceleration
       prevent_overshoot = not CP.stoppingControl and v_ego < 1.5 and v_target_future < 0.7
       deadzone = interp(v_ego_pid, CP.longitudinalTuning.deadzoneBP, CP.longitudinalTuning.deadzoneV)
-      print "a_target"
-      print a_target
+      #print "a_target"
+      #print a_target
       if longitudinalPlanSource == 'cruise':
         if decelForTurn and not self.lastdecelForTurn:
           self.lastdecelForTurn = True
@@ -184,8 +184,8 @@ class LongControl(object):
         self.pid.k_f=0.9
         
       output_gb = self.pid.update(self.v_pid, v_ego_pid, speed=v_ego_pid, deadzone=deadzone, feedforward=a_target, freeze_integrator=prevent_overshoot)
-      print "output_gb"
-      print output_gb
+      #print "output_gb"
+      #print output_gb
       
       if prevent_overshoot:
         output_gb = min(output_gb, 0.0)
