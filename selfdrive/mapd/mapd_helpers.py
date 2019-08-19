@@ -536,7 +536,7 @@ class Way:
     pnts = None
     way = self
     valid = False
-
+    
     for i in range(5):
       # Get new points and append to list
       new_pnts = way.points_in_car_frame(lat, lon, heading)
@@ -555,8 +555,11 @@ class Way:
         break
 
       # Find next way
+      startid = way.way.nodes[0].id
+      endid = way.way.nodes[-1].id
       way = way.next_way(heading)
       if not way:
         break
-
+      if not (way.way.nodes[0].id == startid or way.way.nodes[0].id == endid or way.way.nodes[-1].id == startid or way.way.nodes[-1].id == endid):
+        break
     return pnts, valid
