@@ -233,7 +233,7 @@ def state_control(rcv_times, plan, path_plan, CS, CP, state, events, v_cruise_kp
 
   if state in [State.preEnabled, State.disabled]:
     LaC.reset()
-    LoC.reset(v_pid=CS.vEgo)
+    LoC.reset(v_pid=plan.vTargetFuture)
 
   elif state in [State.enabled, State.softDisabling]:
     # parse warnings from car specific interface
