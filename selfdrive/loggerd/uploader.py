@@ -278,6 +278,7 @@ def uploader_fn(exit_event):
     last_gps_size = os.path.getsize("/data/openpilot/selfdrive/data_collection/gps-data")
   except:
     last_gps_size = None
+  
   while True:
     allow_cellular = (params.get("IsUploadVideoOverCellularEnabled") != "0")
     on_hotspot = is_on_hotspot()
@@ -295,7 +296,7 @@ def uploader_fn(exit_event):
           gps_uploader.upload_data()
       except:
         pass
-
+      
     try:
       last_df_size = os.path.getsize("/data/openpilot/selfdrive/data_collection/df-data")
     except:
@@ -304,7 +305,7 @@ def uploader_fn(exit_event):
       last_gps_size = os.path.getsize("/data/openpilot/selfdrive/data_collection/gps-data")
     except:
       last_gps_size = None
-
+    
     if exit_event.is_set():
       return
 

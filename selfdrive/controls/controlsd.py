@@ -233,7 +233,10 @@ def state_control(rcv_times, plan, path_plan, CS, CP, state, events, v_cruise_kp
 
   if state in [State.preEnabled, State.disabled]:
     LaC.reset()
-    LoC.reset(v_pid=CS.vEgo)
+    if CS.vEgo > 2.0:
+      LoC.reset(v_pid=plan.vTargetFuture)
+    else:
+      LoC.reset(v_pid=plan.vTargetFuture+5.0)
 
   elif state in [State.enabled, State.softDisabling]:
     # parse warnings from car specific interface
@@ -261,12 +264,16 @@ def state_control(rcv_times, plan, path_plan, CS, CP, state, events, v_cruise_kp
   _DT = 0.01 # 100Hz
 
   dt = min(cur_time - radar_time, _DT_MPC + _DT) + _DT  # no greater than dt mpc + dt, to prevent too high extraps
+  #print "plan.aTarget"
+  #print plan.aTarget
+  #print "plan.aStart"
+  #print plan.aStart
   a_acc_sol = plan.aStart + (dt / _DT_MPC) * (plan.aTarget - plan.aStart)
   v_acc_sol = plan.vStart + dt * (a_acc_sol + plan.aStart) / 2.0
 
   # Gas/Brake PID loop
   actuators.gas, actuators.brake = LoC.update(active, CS.vEgo, CS.brakePressed, CS.standstill, CS.cruiseState.standstill,
-                                              v_cruise_kph, v_acc_sol, plan.vTargetFuture, a_acc_sol, CP, gasinterceptor, CS.gasbuttonstatus)
+                                              v_cruise_kph, v_acc_sol, plan.vTargetFuture, a_acc_sol, CP, gasinterceptor, CS.gasbuttonstatus, plan.decelForTurn, plan.longitudinalPlanSource)
   # Steering PID loop and lateral MPC
 
   actuators.steer, actuators.steerAngle, lac_log = LaC.update(active, CS.vEgo, CS.steeringAngle, CS.steeringRate,

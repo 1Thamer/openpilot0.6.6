@@ -17,8 +17,8 @@ AudibleAlert = car.CarControl.HUDControl.AudibleAlert
 
 # Accel limits
 ACCEL_HYST_GAP = 0.02  # don't change accel command for small oscilalitons within this value
-ACCEL_MAX = 3.5  # 3.5 m/s2
-ACCEL_MIN = -4.0 # 4   m/s2
+ACCEL_MAX = 3.0  # 3.0 m/s2
+ACCEL_MIN = -3.0 # 3   m/s2
 ACCEL_SCALE = max(ACCEL_MAX, -ACCEL_MIN)
 
 # Steer torque limits
@@ -335,6 +335,9 @@ class CarController(object):
     if (frame % 3 == 0 and ECU.DSU in self.fake_ecus) or (pcm_cancel_cmd and ECU.CAM in self.fake_ecus):
       lead = lead or CS.v_ego < 12.    # at low speed we always assume the lead is present do ACC can be engaged
       if ECU.DSU in self.fake_ecus:
+        #if enabled:
+        #  print "actual decel"
+        #  print apply_accel
         can_sends.append(create_accel_command(self.packer, apply_accel, pcm_cancel_cmd, self.standstill_req, lead, distance))
       else:
         can_sends.append(create_accel_command(self.packer, 0, pcm_cancel_cmd, False, lead, distance))

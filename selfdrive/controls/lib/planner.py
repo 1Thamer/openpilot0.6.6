@@ -129,8 +129,12 @@ class Planner(object):
       elif slowest == 'cruise':
         self.v_acc = self.v_cruise
         self.a_acc = self.a_cruise
+      #print "slowest"
+      #print slowest
 
     self.v_acc_future = min([self.mpc1.v_mpc_future, self.mpc2.v_mpc_future, v_cruise_setpoint])
+    #print "v_acc_future"
+    #print self.v_acc_future
 
 
   def update(self, rcv_times, CS, CP, VM, PP, live20, live100, md, live_map_data):
@@ -138,7 +142,14 @@ class Planner(object):
     cur_time = sec_since_boot()
     v_ego = CS.carState.vEgo
     gasbuttonstatus = CS.carState.gasbuttonstatus
-
+    
+    if gasbuttonstatus == 1:
+      speed_ahead_distance = 150
+    elif gasbuttonstatus == 2:
+      speed_ahead_distance = 350
+    else:
+      speed_ahead_distance = 250
+      
     long_control_state = live100.live100.longControlState
     v_cruise_kph = live100.live100.vCruise
     force_slow_decel = live100.live100.forceDecel
@@ -161,6 +172,7 @@ class Planner(object):
     v_curvature = NO_CURVATURE_SPEED
     v_speedlimit_ahead = NO_CURVATURE_SPEED
 
+
     map_age = cur_time - rcv_times['liveMapData']
     map_valid = True #live_map_data.liveMapData.mapValid and map_age < 10.0
 
@@ -171,14 +183,26 @@ class Planner(object):
       if live_map_data.liveMapData.speedLimitValid:
         speed_limit = live_map_data.liveMapData.speedLimit
         v_speedlimit = speed_limit + offset
-      if gasbuttonstatus == 1:
-        speed_ahead_distance = 100
-      elif gasbuttonstatus == 2:
-        speed_ahead_distance = 300
       else:
-        speed_ahead_distance = 200
+        speed_limit = None
       if live_map_data.liveMapData.speedLimitAheadValid and live_map_data.liveMapData.speedLimitAheadDistance < speed_ahead_distance:
-        speed_limit_ahead = live_map_data.liveMapData.speedLimitAhead
+        distanceatlowlimit = 50
+        if live_map_data.liveMapData.speedLimitAhead < 21/3.6:
+          distanceatlowlimit = speed_ahead_distance = (v_ego - live_map_data.liveMapData.speedLimitAhead)*3.6*2
+          if distanceatlowlimit < 50:
+            distanceatlowlimit = 0
+          distanceatlowlimit = min(distanceatlowlimit,100)
+          speed_ahead_distance = (v_ego - live_map_data.liveMapData.speedLimitAhead)*3.6*5
+          speed_ahead_distance = min(speed_ahead_distance,300)
+          speed_ahead_distance = max(speed_ahead_distance,50)
+          
+        #if speed_limit is not None:
+        #  if v_ego + 20/3.6 > live_map_data.liveMapData.speedLimitAhead + (speed_limit - live_map_data.liveMapData.speedLimitAhead)*(live_map_data.liveMapData.speedLimitAheadDistance)/(speed_ahead_distance):
+        #    distanceatlowlimit = 100
+        if speed_limit is not None and live_map_data.liveMapData.speedLimitAheadDistance > distanceatlowlimit and v_ego + 3 < live_map_data.liveMapData.speedLimitAhead + (speed_limit - live_map_data.liveMapData.speedLimitAhead)*live_map_data.liveMapData.speedLimitAheadDistance/speed_ahead_distance:
+          speed_limit_ahead = live_map_data.liveMapData.speedLimitAhead + (speed_limit - live_map_data.liveMapData.speedLimitAhead)*(live_map_data.liveMapData.speedLimitAheadDistance - distanceatlowlimit)/(speed_ahead_distance - distanceatlowlimit)
+        else:
+          speed_limit_ahead = live_map_data.liveMapData.speedLimitAhead
         #print "Speed Ahead found"
         #print speed_limit_ahead
         v_speedlimit_ahead = speed_limit_ahead + offset
@@ -222,28 +246,40 @@ class Planner(object):
         accel_limits[0] = min(accel_limits[0], accel_limits[1])
         
       # Change accel limits based on time remaining to turn
-      if decel_for_turn:
+      if decel_for_turn and live_map_data.liveMapData.distToTurn < speed_ahead_distance:
         time_to_turn = max(1.0, live_map_data.liveMapData.distToTurn / max((v_ego + v_curvature)/2, 1.))
-        required_decel = min(0, (v_curvature - v_ego) / time_to_turn*0.85)
+        required_decel = min(0, (v_curvature - v_ego) / time_to_turn)
         accel_limits[0] = max(accel_limits[0], required_decel)
         
-      if v_speedlimit_ahead < v_speedlimit:
-        if live_map_data.liveMapData.speedLimitAheadDistance != 0:
-          required_decel = min(0, (v_speedlimit_ahead*v_speedlimit_ahead - v_ego*v_ego)/(live_map_data.liveMapData.speedLimitAheadDistance*2))
-        required_decel = max(required_decel*0.85, -3.0)
-        #print "required_decel"
+        #print "required turn decel"
         #print required_decel
-        #print "accel_limits 0"
-        #print accel_limits[0]
-        #print "accel_limits 1"
-        #print accel_limits[1]
-        accel_limits[0] = min(accel_limits[0], required_decel)
+        
+      if v_speedlimit_ahead < v_speedlimit and self.longitudinalPlanSource =='cruise' and v_ego > v_speedlimit_ahead:
+        if live_map_data.liveMapData.speedLimitAheadDistance > 1:
+          required_decel = min(0, (v_speedlimit_ahead*v_speedlimit_ahead - v_ego*v_ego)/(live_map_data.liveMapData.speedLimitAheadDistance*2))
+          required_decel = max(required_decel, -3.0)
+          #print "required_decel"
+          #print required_decel
+          #print "accel_limits 0"
+          #print accel_limits[0]
+          #print "accel_limits 1"
+          #print accel_limits[1]
+          accel_limits[0] = required_decel
+          accel_limits[1] = required_decel
+          self.a_acc_start = required_decel
+          #print "required decel speed"
+          #print required_decel
         
       self.v_cruise, self.a_cruise = speed_smoother(self.v_acc_start, self.a_acc_start,
                                                     v_cruise_setpoint,
                                                     accel_limits[1], accel_limits[0],
                                                     jerk_limits[1], jerk_limits[0],
                                                     _DT_MPC)
+      #print "after speed_smoother"
+      #print "v_cruise"
+      #print self.v_cruise
+      #print "a_cruise"
+      #print self.a_cruise
       # cruise speed can't be negative even is user is distracted
       self.v_cruise = max(self.v_cruise, 0.)
     else:
@@ -293,13 +329,17 @@ class Planner(object):
 
 
     # longitudal plan
-    plan_send.plan.vCruise = self.v_cruise
-    plan_send.plan.aCruise = self.a_cruise
-    plan_send.plan.vStart = self.v_acc_start
-    plan_send.plan.aStart = self.a_acc_start
-    plan_send.plan.vTarget = self.v_acc
-    plan_send.plan.aTarget = self.a_acc
-    plan_send.plan.vTargetFuture = self.v_acc_future
+    plan_send.plan.vCruise = float(self.v_cruise)
+    plan_send.plan.aCruise = float(self.a_cruise)
+    plan_send.plan.vStart = float(self.v_acc_start)
+    plan_send.plan.aStart = float(self.a_acc_start)
+    #print "aStart from planner"
+    #print self.a_acc_start
+    #print "aTarget from Planner"
+    #print self.a_acc
+    plan_send.plan.vTarget = float(self.v_acc)
+    plan_send.plan.aTarget = float(self.a_acc)
+    plan_send.plan.vTargetFuture = float(self.v_acc_future)
     plan_send.plan.hasLead = self.mpc1.prev_lead_status
     plan_send.plan.hasrightLaneDepart = bool(PP.r_poly[3] > -1.1 and not CS.carState.rightBlinker)
     plan_send.plan.hasleftLaneDepart = bool(PP.l_poly[3] < 1.05 and not CS.carState.leftBlinker)
@@ -327,3 +367,5 @@ class Planner(object):
     v_acc_sol = self.v_acc_start + dt * (a_acc_sol + self.a_acc_start) / 2.0
     self.v_acc_start = v_acc_sol
     self.a_acc_start = a_acc_sol
+    #print "a_acc_start"
+    #print a_acc_sol

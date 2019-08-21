@@ -64,12 +64,13 @@ class LongControl(object):
     self.long_control_state = LongCtrlState.off  # initialized to off
     self.pid = PIController((CP.longitudinalTuning.kpBP, CP.longitudinalTuning.kpV),
                             (CP.longitudinalTuning.kiBP, CP.longitudinalTuning.kiV),
+                            k_f=0.9,
                             rate=RATE,
                             sat_limit=0.8,
                             convert=compute_gb)
     self.v_pid = 0.0
     self.last_output_gb = 0.0
-
+    self.lastdecelForTurn = False
     context = zmq.Context()
     self.poller = zmq.Poller()
     self.live20 = messaging.sub_sock(context, service_list['live20'].port, conflate=True, poller=self.poller)
@@ -120,7 +121,7 @@ class LongControl(object):
     return round(max(min(accel, max_return), min_return), 5)  # ensure we return a value between range
 
   def update(self, active, v_ego, brake_pressed, standstill, cruise_standstill, v_cruise, v_target, v_target_future,
-             a_target, CP, gasinterceptor, gasbuttonstatus):
+             a_target, CP, gasinterceptor, gasbuttonstatus, decelForTurn, longitudinalPlanSource):
     """Update longitudinal control. This updates the state machine and runs a PID loop"""
     # Actuation limits
     l20 = None
@@ -162,9 +163,30 @@ class LongControl(object):
       # Freeze the integrator so we don't accelerate to compensate, and don't allow positive acceleration
       prevent_overshoot = not CP.stoppingControl and v_ego < 1.5 and v_target_future < 0.7
       deadzone = interp(v_ego_pid, CP.longitudinalTuning.deadzoneBP, CP.longitudinalTuning.deadzoneV)
-
+      #print "a_target"
+      #print a_target
+      if longitudinalPlanSource == 'cruise':
+        if decelForTurn and not self.lastdecelForTurn:
+          self.lastdecelForTurn = True
+          self.pid._k_p = (CP.longitudinalTuning.kpBP, [x * 0 for x in CP.longitudinalTuning.kpV])
+          self.pid._k_i = (CP.longitudinalTuning.kiBP, [x * 0 for x in CP.longitudinalTuning.kiV])
+          self.pid.i = 0.0
+          self.pid.k_f=1.0
+        if self.lastdecelForTurn and not decelForTurn:
+          self.lastdecelForTurn = False
+          self.pid._k_p = (CP.longitudinalTuning.kpBP, CP.longitudinalTuning.kpV)
+          self.pid._k_i = (CP.longitudinalTuning.kiBP, CP.longitudinalTuning.kiV)
+          self.pid.k_f=0.9
+      else:
+        self.lastdecelForTurn = False
+        self.pid._k_p = (CP.longitudinalTuning.kpBP, CP.longitudinalTuning.kpV)
+        self.pid._k_i = (CP.longitudinalTuning.kiBP, CP.longitudinalTuning.kiV)
+        self.pid.k_f=1.0
+        
       output_gb = self.pid.update(self.v_pid, v_ego_pid, speed=v_ego_pid, deadzone=deadzone, feedforward=a_target, freeze_integrator=prevent_overshoot)
-
+      #print "output_gb"
+      #print output_gb
+      
       if prevent_overshoot:
         output_gb = min(output_gb, 0.0)
 

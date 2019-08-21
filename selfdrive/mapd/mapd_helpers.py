@@ -62,12 +62,19 @@ def parse_speed_tags(tags):
       cond = cond[1:-1]
 
       start, end = cond.split('-')
+      starthour, startminute = start.split(':')
+      endhour, endminute = end.split(':')
       now = datetime.now()  # TODO: Get time and timezone from gps fix so this will work correctly on replays
       start = datetime.strptime(start, "%H:%M").replace(year=now.year, month=now.month, day=now.day)
-      end = datetime.strptime(end, "%H:%M").replace(year=now.year, month=now.month, day=now.day)
-
-      if start <= now <= end:
-        max_speed = max_speed_cond
+      midnight = datetime.strptime("00:00", "%H:%M").replace(year=now.year, month=now.month, day=now.day)
+      end1 = datetime.strptime(end, "%H:%M").replace(year=now.year, month=now.month, day=now.day)
+      if int(endhour) + int(endminute)/60 < int(starthour) + int(startminute)/60:
+        end2 = datetime.strptime(end, "%H:%M").replace(year=now.year, month=now.month, day=now.day+1)
+        if start <= now <= end2 or midnight <= now <= end1:
+          max_speed = max_speed_cond
+      else:
+        if start <= now <= end1:
+          max_speed = max_speed_cond
     except ValueError:
       pass
 
@@ -258,7 +265,7 @@ class Way:
         #print "max_dist break"
         break
       try:
-        if way.way.tags['junction']=='roundabout':
+        if way.way.tags['junction']=='roundabout' or way.way.tags['junction']=='circular':
           latmin = 181
           lonmin = 181
           latmax = -181
@@ -352,6 +359,47 @@ class Way:
               break
       except KeyError:
         pass
+      try:
+        count = 0
+        loop_must_break = False
+        for n in self.way.nodes:
+          if 'highway' in n.tags and (n.tags['highway']=='stop' or n.tags['highway']=='give_way'):
+            if backwards and (n.tags['direction']=='backward'  or n.tags['direction']=='both'):
+              print "backward"
+              if way_pts[count, 0] > 0:
+                speed_ahead_dist = way_pts[count, 0]
+                print speed_ahead_dist
+                speed_ahead = 5/3.6
+                loop_must_break = True
+                break
+            elif not backwards and (n.tags['direction']=='forward' or n.tags['direction']=='both'):
+              print "forward"
+              if way_pts[count, 0] > 0:
+                speed_ahead_dist = way_pts[count, 0]
+                print speed_ahead_dist
+                speed_ahead = 5/3.6
+                loop_must_break = True
+                break
+            try:
+              if int(n.tags['direction']) > -0.1 and int(n.tags['direction']) < 360.1:
+                print int(n.tags['direction'])
+                direction = int(n.tags['direction']) - heading
+                if direction < -180:
+                  direction = direction + 360
+                if direction > 180:
+                  direction = direction - 360
+                if abs(direction) > 135:
+                  speed_ahead_dist = way_pts[count, 0]
+                  print speed_ahead_dist
+                  speed_ahead = 5/3.6
+                  loop_must_break = True
+                  break
+            except ValueError:
+              pass
+          count += 1
+        if loop_must_break: break
+      except (KeyError, IndexError, ValueError):
+        pass
       # Find next way
       way = way.next_way(heading)
       if not way:
@@ -444,7 +492,7 @@ class Way:
         return way
       if len(ways) == 2:
         try:
-          if ways[0].tags['junction']=='roundabout':
+          if ways[0].tags['junction']=='roundabout' or ways[0].tags['junction']=='circular':
             #print ("roundabout found")
             way = Way(ways[0], self.query_results)
             return way
@@ -488,7 +536,7 @@ class Way:
     pnts = None
     way = self
     valid = False
-
+    
     for i in range(5):
       # Get new points and append to list
       new_pnts = way.points_in_car_frame(lat, lon, heading)
@@ -507,8 +555,11 @@ class Way:
         break
 
       # Find next way
+      startid = way.way.nodes[0].id
+      endid = way.way.nodes[-1].id
       way = way.next_way(heading)
       if not way:
         break
-
+      if not (way.way.nodes[0].id == startid or way.way.nodes[0].id == endid or way.way.nodes[-1].id == startid or way.way.nodes[-1].id == endid):
+        break
     return pnts, valid
