@@ -498,6 +498,16 @@ class Way:
             return way
         except (KeyError, IndexError):
           pass
+        try:
+          if ways[0].tags['oneway'] == 'yes':
+            if ways[0].nodes[0].id == node.id:
+              way = Way(ways[0], self.query_results)
+              return way
+            else:
+              way = Way(ways[1], self.query_results)
+              return way
+        except (KeyError, IndexError):
+          pass
       ways = [w for w in ways if (w.nodes[0] == node or w.nodes[-1] == node)]
       if len(ways) == 1:
         way = Way(ways[0], self.query_results)
@@ -516,6 +526,24 @@ class Way:
         way = Way(ways[0], self.query_results)
         #print "only one way found"
         return way
+      if len(ways) == 2:
+        try:
+          if ways[0].tags['junction']=='roundabout' or ways[0].tags['junction']=='circular':
+            #print ("roundabout found")
+            way = Way(ways[0], self.query_results)
+            return way
+        except (KeyError, IndexError):
+          pass
+        try:
+          if ways[0].tags['oneway'] == 'yes':
+            if ways[0].nodes[0].id == node.id:
+              way = Way(ways[0], self.query_results)
+              return way
+            else:
+              way = Way(ways[1], self.query_results)
+              return way
+        except (KeyError, IndexError):
+          pass
       # Filter on number of lanes
       cur_num_lanes = int(self.way.tags['lanes'])
       if len(ways) > 1:
