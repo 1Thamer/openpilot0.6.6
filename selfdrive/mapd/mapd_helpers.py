@@ -571,14 +571,13 @@ class Way:
 
       if pnts is None:
         pnts = new_pnts
+        valid = True
       else:
         new_pnts = np.delete(new_pnts,[0,0,0], axis=0)
         pnts = np.vstack([pnts, new_pnts])
 
       # Check current lookahead distance
       max_dist = np.linalg.norm(pnts[-1, :])
-      if max_dist > lookahead:
-        valid = True
 
       if max_dist > 2 * lookahead:
         break
