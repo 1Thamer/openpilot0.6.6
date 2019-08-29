@@ -94,8 +94,8 @@ class CarInterface(object):
     else:
       ret.gasMaxBP = [0.]
       ret.gasMaxV = [0.5]
-      ret.longitudinalTuning.kpV = [0.25, 0.25, 0.25]  # braking tune from rav4h
-      ret.longitudinalTuning.kiV = [0.020, 0.010]
+      ret.longitudinalTuning.kpV = [0.325, 0.325, 0.325]  # braking tune from rav4h
+      ret.longitudinalTuning.kiV = [0.001, 0.0010]
 
     ret.steerActuatorDelay = 0.12  # Default delay, Prius has larger delay
     if candidate != CAR.PRIUS:
