@@ -500,10 +500,10 @@ class Way:
           pass
         try:
           if ways[0].tags['oneway'] == 'yes':
-            if ways[0].nodes[0].id == node.id:
+            if ways[0].nodes[0].id == node.id and ways[1].nodes[0].id != node.id:
               way = Way(ways[0], self.query_results)
               return way
-            else:
+            elif ways[0].nodes[0].id != node.id and ways[1].nodes[0].id == node.id:
               way = Way(ways[1], self.query_results)
               return way
         except (KeyError, IndexError):
@@ -536,10 +536,10 @@ class Way:
           pass
         try:
           if ways[0].tags['oneway'] == 'yes':
-            if ways[0].nodes[0].id == node.id:
+            if ways[0].nodes[0].id == node.id and ways[1].nodes[0].id != node.id:
               way = Way(ways[0], self.query_results)
               return way
-            else:
+            elif ways[0].nodes[0].id != node.id and ways[1].nodes[0].id == node.id:
               way = Way(ways[1], self.query_results)
               return way
         except (KeyError, IndexError):
