@@ -212,6 +212,9 @@ class Planner(object):
         a_y_max = (3.0) * _brake_factor # ~1.85 @ 75mph, ~2.6 @ 25mph
         v_curvature = math.sqrt(a_y_max / max(1e-4, curvature))
         v_curvature = min(NO_CURVATURE_SPEED, v_curvature)
+        if v_curvature < 10.0:
+          v_curvature = NO_CURVATURE_SPEED
+        v_curvature = max(10.0, v_curvature)
 
     decel_for_turn = bool(v_curvature < min([v_cruise_setpoint, v_speedlimit, v_ego + 1.]))
     v_cruise_setpoint = min([v_cruise_setpoint, v_curvature, v_speedlimit, v_speedlimit_ahead])
