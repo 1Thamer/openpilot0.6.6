@@ -568,7 +568,7 @@ class Way:
     for i in range(5):
       # Get new points and append to list
       new_pnts = way.points_in_car_frame(lat, lon, heading)
-              break
+
       try:
         if way.way.tags['junction']=='roundabout' or way.way.tags['junction']=='circular':
           break
