@@ -227,16 +227,17 @@ def mapsd_thread():
       cur_way = Way.closest(last_query_result, lat, lon, heading, cur_way)
       if cur_way is not None:
         pnts, curvature_valid = cur_way.get_lookahead(lat, lon, heading, MAPS_LOOKAHEAD_DISTANCE)
+        if pnts is not None:
+          xs = pnts[:, 0]
+          ys = pnts[:, 1]
+          road_points = [float(x) for x in xs], [float(y) for y in ys]
 
-        xs = pnts[:, 0]
-        ys = pnts[:, 1]
-        road_points = [float(x) for x in xs], [float(y) for y in ys]
-
-        if speed < 5:
+          if speed < 5:
+            curvature_valid = False
+          if curvature_valid and pnts.shape[0] <= 3:
+            curvature_valid = False
+        else:
           curvature_valid = False
-        if curvature_valid and pnts.shape[0] <= 3:
-          curvature_valid = False
-
         # The curvature is valid when at least MAPS_LOOKAHEAD_DISTANCE of road is found
         if curvature_valid:
           # Compute the curvature for each point
