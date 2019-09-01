@@ -382,7 +382,10 @@ class CarInterface(object):
     ret.steeringPressed = self.CS.steer_override
 
     # cruise state
-    ret.cruiseState.enabled = self.CS.pcm_acc_active
+    if not self.cruise_enabled_prev:
+      ret.cruiseState.enabled = self.CS.pcm_acc_active
+    else:
+      ret.cruiseState.enabled = bool(self.CS.main_on)
     ret.cruiseState.speed = self.CS.v_cruise_pcm * CV.KPH_TO_MS
     ret.cruiseState.available = bool(self.CS.main_on)
     ret.cruiseState.speedOffset = 0.
