@@ -209,9 +209,10 @@ class Planner(object):
 
       if live_map_data.liveMapData.curvatureValid:
         curvature = abs(live_map_data.liveMapData.curvature)
-        a_y_max = (3.3 - v_ego * 0.125) * _brake_factor # ~1.85 @ 75mph, ~2.6 @ 25mph
-        a_y_max = max(a_y_max, 0.95)
-        v_curvature = math.sqrt(a_y_max / max(1e-4, curvature))
+        #a_y_max = (3.3 - v_ego * 0.125) *  # ~1.85 @ 75mph, ~2.6 @ 25mph
+        #a_y_max = max(a_y_max, 0.95)
+        curvature = max(1e-4, curvature)
+        v_curvature = -_brake_factor/8/curvature + math.sqrt(_brake_factor*_brake_factor/128/curvature/curvature+ 6.6/curvature )
         v_curvature = min(NO_CURVATURE_SPEED, v_curvature)
         #if v_curvature < 10.0:
         #  v_curvature = NO_CURVATURE_SPEED
