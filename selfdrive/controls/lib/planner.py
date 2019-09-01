@@ -213,17 +213,15 @@ class Planner(object):
         #a_y_max = max(a_y_max, 0.95)
         radius = 1/max(1e-4, curvature)
         if radius > 1000:
-          c=1.0
-        elif radius < 100:
-          c=2.0
+          c=1.0 # 1.0 at 1000m = 113 kph
         else:
-          c= 19/9-1/900*radius
+          c= 597/197-2/985*radius # 3.0 at 15m 24 kph
         
         v_curvature = math.sqrt(c*radius)
         v_curvature = min(NO_CURVATURE_SPEED, v_curvature)
         #if v_curvature < 10.0:
         #  v_curvature = NO_CURVATURE_SPEED
-        v_curvature = max(10.0, v_curvature)
+        #v_curvature = max(10.0, v_curvature)
 
     decel_for_turn = bool(v_curvature < min([v_cruise_setpoint, v_speedlimit, v_ego + 1.]))
     v_cruise_setpoint = min([v_cruise_setpoint, v_curvature, v_speedlimit, v_speedlimit_ahead])
