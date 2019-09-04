@@ -239,6 +239,7 @@ def mapsd_thread():
         else:
           curvature_valid = False
           upcoming_curvature = 0.
+          curvature = None
           dist_to_turn = 0.
         # The curvature is valid when at least MAPS_LOOKAHEAD_DISTANCE of road is found
         if curvature_valid:
