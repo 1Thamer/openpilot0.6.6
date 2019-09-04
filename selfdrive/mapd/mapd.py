@@ -277,7 +277,7 @@ def mapsd_thread():
 
             k = 0.6
             upcoming_curvature = k * upcoming_curvature + (1 - k) * new_curvature
-            in_turn_indices = curvature > 0.1 * new_curvature
+            in_turn_indices = curvature > 0.05 * new_curvature
 
             if np.any(in_turn_indices):
               dist_to_turn = np.min(dists[in_turn_indices])
