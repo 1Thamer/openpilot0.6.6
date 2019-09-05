@@ -60,20 +60,25 @@ def parse_speed_tags(tags):
     try:
       max_speed_cond, cond = tags['maxspeed:conditional'].split(' @ ')
       cond = cond[1:-1]
-
+      weekday = True
+      now = datetime.now()  # TODO: Get time and timezone from gps fix so this will work correctly on replays
+      if cond.find('Mo-Fr') > -0.5:
+        cond = cond.replace('Mo-Fr','')
+        cond = cond.replace(' ','')
+        if now.weekday() > 4:
+          weekday = False
       start, end = cond.split('-')
       starthour, startminute = start.split(':')
       endhour, endminute = end.split(':')
-      now = datetime.now()  # TODO: Get time and timezone from gps fix so this will work correctly on replays
       start = datetime.strptime(start, "%H:%M").replace(year=now.year, month=now.month, day=now.day)
       midnight = datetime.strptime("00:00", "%H:%M").replace(year=now.year, month=now.month, day=now.day)
       end1 = datetime.strptime(end, "%H:%M").replace(year=now.year, month=now.month, day=now.day)
       if int(endhour) + int(endminute)/60 < int(starthour) + int(startminute)/60:
         end2 = datetime.strptime(end, "%H:%M").replace(year=now.year, month=now.month, day=now.day+1)
-        if start <= now <= end2 or midnight <= now <= end1:
+        if start <= now <= end2 or midnight <= now <= end1 and weekday:
           max_speed = max_speed_cond
       else:
-        if start <= now <= end1:
+        if start <= now <= end1 and weekday:
           max_speed = max_speed_cond
     except ValueError:
       pass
