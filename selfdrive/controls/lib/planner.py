@@ -213,9 +213,9 @@ class Planner(object):
         #a_y_max = max(a_y_max, 0.95)
         radius = 1/max(1e-4, curvature)
         if radius > 1000:
-          c=0.9 # 0.9 at 1000m = 108 kph
+          c=0.7 # 0.7 at 1000m = 95 kph
         else:
-          c= 5973/1970-21/9850*radius # 3.0 at 15m 24 kph
+          c= 5979/1970-23/9850*radius # 3.0 at 15m 24 kph
         
         v_curvature = math.sqrt(c*radius)
         v_curvature = min(NO_CURVATURE_SPEED, v_curvature)
