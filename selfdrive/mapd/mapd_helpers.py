@@ -59,6 +59,11 @@ def parse_speed_tags(tags):
   if 'maxspeed:conditional' in tags:
     try:
       max_speed_cond, cond = tags['maxspeed:conditional'].split(' @ ')
+      if cond.find('wet') > -0.5:
+        cond = cond.replace('wet','')
+        cond = cond.replace(' ','')
+        weekday = False
+        #TODO Check if road is wet waybe if wipers are on.
       cond = cond[1:-1]
       weekday = True
       now = datetime.now()  # TODO: Get time and timezone from gps fix so this will work correctly on replays
@@ -67,19 +72,31 @@ def parse_speed_tags(tags):
         cond = cond.replace(' ','')
         if now.weekday() > 4:
           weekday = False
-      start, end = cond.split('-')
-      starthour, startminute = start.split(':')
-      endhour, endminute = end.split(':')
-      start = datetime.strptime(start, "%H:%M").replace(year=now.year, month=now.month, day=now.day)
-      midnight = datetime.strptime("00:00", "%H:%M").replace(year=now.year, month=now.month, day=now.day)
-      end1 = datetime.strptime(end, "%H:%M").replace(year=now.year, month=now.month, day=now.day)
-      if int(endhour) + int(endminute)/60 < int(starthour) + int(startminute)/60:
-        end2 = datetime.strptime(end, "%H:%M").replace(year=now.year, month=now.month, day=now.day+1)
-        if start <= now <= end2 or midnight <= now <= end1 and weekday:
+      if cond.find('Mo-Su') > -0.5:
+        cond = cond.replace('Mo-Su','')
+        cond = cond.replace(' ','')
+      if cond.find('; SH off') > -0.5:
+        cond = cond.replace('; SH off','')
+        cond = cond.replace(' ','')
+      if cond.find('Oct-Apr') > -0.5:
+        if 4 > now.month > 10:
+          weekday = False
+        else:
           max_speed = max_speed_cond
       else:
-        if start <= now <= end1 and weekday:
-          max_speed = max_speed_cond
+        start, end = cond.split('-')
+        starthour, startminute = start.split(':')
+        endhour, endminute = end.split(':')
+        start = datetime.strptime(start, "%H:%M").replace(year=now.year, month=now.month, day=now.day)
+        midnight = datetime.strptime("00:00", "%H:%M").replace(year=now.year, month=now.month, day=now.day)
+        end1 = datetime.strptime(end, "%H:%M").replace(year=now.year, month=now.month, day=now.day)
+        if int(endhour) + int(endminute)/60 < int(starthour) + int(startminute)/60:
+          end2 = datetime.strptime(end, "%H:%M").replace(year=now.year, month=now.month, day=now.day+1)
+          if start <= now <= end2 or midnight <= now <= end1 and weekday:
+            max_speed = max_speed_cond
+        else:
+          if start <= now <= end1 and weekday:
+            max_speed = max_speed_cond
     except ValueError:
       pass
 
