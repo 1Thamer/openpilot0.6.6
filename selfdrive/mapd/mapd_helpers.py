@@ -58,6 +58,7 @@ def parse_speed_tags(tags):
 
   if 'maxspeed:conditional' in tags:
     try:
+      weekday = True
       max_speed_cond, cond = tags['maxspeed:conditional'].split(' @ ')
       if cond.find('wet') > -0.5:
         cond = cond.replace('wet','')
@@ -65,7 +66,7 @@ def parse_speed_tags(tags):
         weekday = False
         #TODO Check if road is wet waybe if wipers are on.
       cond = cond[1:-1]
-      weekday = True
+      
       now = datetime.now()  # TODO: Get time and timezone from gps fix so this will work correctly on replays
       if cond.find('Mo-Fr') > -0.5:
         cond = cond.replace('Mo-Fr','')
