@@ -272,17 +272,12 @@ def mapsd_thread():
             # TODO: Determine left or right turn
             curvature = np.nan_to_num(curvature)
 
-            # Outlier rejection TODO: Needs to include more data i.e. Less outliers
-            new_curvature = np.percentile(curvature, 90, interpolation='lower')
+            
+            
+            upcoming_curvature = np.amax(curvature)
+            dist_to_turn =np.amin(dists[np.logical_and(curvature >= np.amax(curvature), curvature <= np.amax(curvature))])
 
-            k = 0.6
-            upcoming_curvature = k * upcoming_curvature + (1 - k) * new_curvature
-            in_turn_indices = curvature > 0.05 * new_curvature
-
-            if np.any(in_turn_indices):
-              dist_to_turn = np.min(dists[in_turn_indices])
-            else:
-              dist_to_turn = 999
+            
           else:
             upcoming_curvature = 0.
             dist_to_turn = 999
