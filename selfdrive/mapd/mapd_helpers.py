@@ -386,7 +386,7 @@ class Way:
         count = 0
         loop_must_break = False
         for n in self.way.nodes:
-          if 'highway' in n.tags and (n.tags['highway']=='stop' or n.tags['highway']=='give_way'):
+          if 'highway' in n.tags and (n.tags['highway']=='stop' or n.tags['highway']=='give_way') and way_pts[count,0] > 0:
             if backwards and (n.tags['direction']=='backward'  or n.tags['direction']=='both'):
               print "backward"
               if way_pts[count, 0] > 0:
