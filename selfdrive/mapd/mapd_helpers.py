@@ -479,7 +479,10 @@ class Way:
 
     # Rotate with heading of car
     points_carframe = np.dot(rot, points_carframe[(1, 0, 2), :]).T
-
+    
+    if points_carframe[-1,0] < points_carframe[0,0]:
+      points_carframe = np.flipud(points_carframe)
+      
     return points_carframe
 
   def next_way(self, heading):
