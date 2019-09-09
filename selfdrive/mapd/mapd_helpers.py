@@ -423,7 +423,7 @@ class Way:
                     speed_ahead = 0
                   loop_must_break = True
                   break
-            except ValueError:
+            except (KeyError, ValueError):
               pass
           count += 1
         if loop_must_break: break
