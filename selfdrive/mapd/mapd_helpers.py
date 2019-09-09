@@ -357,7 +357,7 @@ class Way:
           break
       try:
         if backwards:
-          if way.nodes[0].tags['highway']=='mini_roundabout':
+          if way.way.nodes[0].tags['highway']=='mini_roundabout':
             if way_pts[0,0] < 0 and way_pts[-1,0] < 0:
               pass
             elif way_pts[0,0] < 0:
@@ -369,7 +369,7 @@ class Way:
               speed_ahead = 15/3.6
               break
         else:
-          if way.nodes[-1].tags['highway']=='mini_roundabout':
+          if way.way.nodes[-1].tags['highway']=='mini_roundabout':
             if way_pts[0,0] < 0 and way_pts[-1,0] < 0:
               pass
             elif way_pts[0,0] < 0:
@@ -385,7 +385,7 @@ class Way:
       try:
         count = 0
         loop_must_break = False
-        for n in way.nodes:
+        for n in way.way.nodes:
           if 'highway' in n.tags and (n.tags['highway']=='stop' or n.tags['highway']=='give_way') and way_pts[count,0] > 0:
             if backwards and (n.tags['direction']=='backward'  or n.tags['direction']=='both'):
               print "backward"
