@@ -16,12 +16,13 @@ const int TOYOTA_MAX_RT_DELTA = 375;      // max delta torque allowed for real t
 const int TOYOTA_RT_INTERVAL = 250000;    // 250ms between real time checks
 
 // longitudinal limits
-const int TOYOTA_MAX_ACCEL = 3500;        // 3.5 m/s2
-const int TOYOTA_MIN_ACCEL = -4000;       // 4.0 m/s2
+const int TOYOTA_MAX_ACCEL = 3000;        // 3.0 m/s2
+const int TOYOTA_MIN_ACCEL = -3000;       // 3.0 m/s2
 
 // global actuation limit state
 int toyota_actuation_limits = 1;          // by default steer limits are imposed
 int toyota_dbc_eps_torque_factor = 100;   // conversion factor for STEER_TORQUE_EPS in %: see dbc file
+int toyota_gas_pressed = 0;
 
 // state of torque limits
 int toyota_desired_torque_last = 0;       // last desired steer torque
@@ -55,9 +56,9 @@ static void toyota_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
   }
 
   // enter controls on rising edge of ACC, exit controls on ACC off
-  if ((to_push->RIR>>21) == 0x1D2) {
-    // 5th bit is CRUISE_ACTIVE
-    int cruise_engaged = to_push->RDLR & 0x20;
+  if ((to_push->RIR>>21) == 0x1D3) {
+    // 15th bit is MAIN_ON
+    int cruise_engaged = to_push->RDLR & 0x8000;
     if (cruise_engaged && !toyota_cruise_engaged_last) {
       controls_allowed = 1;
     } else if (!cruise_engaged) {
@@ -91,7 +92,7 @@ static int toyota_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
       if (controls_allowed && toyota_actuation_limits) {
         // all messages are fine here
       } else {
-        if ((to_send->RDLR & 0xFFFF0000) != to_send->RDLR) return 0;
+        if ((to_send->RDLR & 0xFFFF0000) != to_send->RDLR) toyota_gas_pressed = 1;
       }
     }
 

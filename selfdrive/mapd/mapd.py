@@ -227,16 +227,20 @@ def mapsd_thread():
       cur_way = Way.closest(last_query_result, lat, lon, heading, cur_way)
       if cur_way is not None:
         pnts, curvature_valid = cur_way.get_lookahead(lat, lon, heading, MAPS_LOOKAHEAD_DISTANCE)
+        if pnts is not None:
+          xs = pnts[:, 0]
+          ys = pnts[:, 1]
+          road_points = [float(x) for x in xs], [float(y) for y in ys]
 
-        xs = pnts[:, 0]
-        ys = pnts[:, 1]
-        road_points = [float(x) for x in xs], [float(y) for y in ys]
-
-        if speed < 5:
+          if speed < 5:
+            curvature_valid = False
+          if curvature_valid and pnts.shape[0] <= 3:
+            curvature_valid = False
+        else:
           curvature_valid = False
-        if curvature_valid and pnts.shape[0] <= 3:
-          curvature_valid = False
-
+          upcoming_curvature = 0.
+          curvature = None
+          dist_to_turn = 0.
         # The curvature is valid when at least MAPS_LOOKAHEAD_DISTANCE of road is found
         if curvature_valid:
           # Compute the curvature for each point
@@ -244,7 +248,14 @@ def mapsd_thread():
             circles = [circle_through_points(*p) for p in zip(pnts, pnts[1:], pnts[2:])]
             circles = np.asarray(circles)
             radii = np.nan_to_num(circles[:, 2])
-            radii[radii < 10] = np.inf
+            radii[radii < 15.] = np.inf
+            try:
+              if cur_way.way.tags['highway'] == 'trunk':
+                radii = radii*1.6 # https://media.springernature.com/lw785/springer-static/image/chp%3A10.1007%2F978-3-658-01689-0_21/MediaObjects/298553_35_De_21_Fig65_HTML.gif
+              if cur_way.way.tags['highway'] == 'motorway' or  cur_way.way.tags['highway'] == 'motorway_link':
+                radii = radii*2.8
+            except KeyError:
+              pass
             curvature = 1. / radii
 
           # Index of closest point
@@ -268,17 +279,12 @@ def mapsd_thread():
             # TODO: Determine left or right turn
             curvature = np.nan_to_num(curvature)
 
-            # Outlier rejection TODO: Needs to include more data i.e. Less outliers
-            new_curvature = np.percentile(curvature, 90, interpolation='lower')
+            
+            
+            upcoming_curvature = np.amax(curvature)
+            dist_to_turn =np.amin(dists[np.logical_and(curvature >= np.amax(curvature), curvature <= np.amax(curvature))])
 
-            k = 0.6
-            upcoming_curvature = k * upcoming_curvature + (1 - k) * new_curvature
-            in_turn_indices = curvature > 0.8 * new_curvature
-
-            if np.any(in_turn_indices):
-              dist_to_turn = np.min(dists[in_turn_indices])
-            else:
-              dist_to_turn = 999
+            
           else:
             upcoming_curvature = 0.
             dist_to_turn = 999

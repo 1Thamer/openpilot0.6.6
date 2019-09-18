@@ -58,23 +58,46 @@ def parse_speed_tags(tags):
 
   if 'maxspeed:conditional' in tags:
     try:
+      weekday = True
       max_speed_cond, cond = tags['maxspeed:conditional'].split(' @ ')
+      if cond.find('wet') > -0.5:
+        cond = cond.replace('wet','')
+        cond = cond.replace(' ','')
+        weekday = False
+        #TODO Check if road is wet waybe if wipers are on.
       cond = cond[1:-1]
-
-      start, end = cond.split('-')
-      starthour, startminute = start.split(':')
-      endhour, endminute = end.split(':')
+      
       now = datetime.now()  # TODO: Get time and timezone from gps fix so this will work correctly on replays
-      start = datetime.strptime(start, "%H:%M").replace(year=now.year, month=now.month, day=now.day)
-      midnight = datetime.strptime("00:00", "%H:%M").replace(year=now.year, month=now.month, day=now.day)
-      end1 = datetime.strptime(end, "%H:%M").replace(year=now.year, month=now.month, day=now.day)
-      if int(endhour) + int(endminute)/60 < int(starthour) + int(startminute)/60:
-        end2 = datetime.strptime(end, "%H:%M").replace(year=now.year, month=now.month, day=now.day+1)
-        if start <= now <= end2 or midnight <= now <= end1:
+      if cond.find('Mo-Fr') > -0.5:
+        cond = cond.replace('Mo-Fr','')
+        cond = cond.replace(' ','')
+        if now.weekday() > 4:
+          weekday = False
+      if cond.find('Mo-Su') > -0.5:
+        cond = cond.replace('Mo-Su','')
+        cond = cond.replace(' ','')
+      if cond.find('; SH off') > -0.5:
+        cond = cond.replace('; SH off','')
+        cond = cond.replace(' ','')
+      if cond.find('Oct-Apr') > -0.5:
+        if 4 > now.month > 10:
+          weekday = False
+        else:
           max_speed = max_speed_cond
       else:
-        if start <= now <= end1:
-          max_speed = max_speed_cond
+        start, end = cond.split('-')
+        starthour, startminute = start.split(':')
+        endhour, endminute = end.split(':')
+        start = datetime.strptime(start, "%H:%M").replace(year=now.year, month=now.month, day=now.day)
+        midnight = datetime.strptime("00:00", "%H:%M").replace(year=now.year, month=now.month, day=now.day)
+        end1 = datetime.strptime(end, "%H:%M").replace(year=now.year, month=now.month, day=now.day)
+        if int(endhour) + int(endminute)/60 < int(starthour) + int(startminute)/60:
+          end2 = datetime.strptime(end, "%H:%M").replace(year=now.year, month=now.month, day=now.day+1)
+          if start <= now <= end2 or midnight <= now <= end1 and weekday:
+            max_speed = max_speed_cond
+        else:
+          if start <= now <= end1 and weekday:
+            max_speed = max_speed_cond
     except ValueError:
       pass
 
@@ -334,7 +357,7 @@ class Way:
           break
       try:
         if backwards:
-          if self.way.nodes[0].tags['highway']=='mini_roundabout':
+          if way.way.nodes[0].tags['highway']=='mini_roundabout':
             if way_pts[0,0] < 0 and way_pts[-1,0] < 0:
               pass
             elif way_pts[0,0] < 0:
@@ -346,7 +369,7 @@ class Way:
               speed_ahead = 15/3.6
               break
         else:
-          if self.way.nodes[-1].tags['highway']=='mini_roundabout':
+          if way.way.nodes[-1].tags['highway']=='mini_roundabout':
             if way_pts[0,0] < 0 and way_pts[-1,0] < 0:
               pass
             elif way_pts[0,0] < 0:
@@ -362,14 +385,16 @@ class Way:
       try:
         count = 0
         loop_must_break = False
-        for n in self.way.nodes:
-          if 'highway' in n.tags and (n.tags['highway']=='stop' or n.tags['highway']=='give_way'):
+        for n in way.way.nodes:
+          if 'highway' in n.tags and (n.tags['highway']=='stop' or n.tags['highway']=='give_way') and way_pts[count,0] > 0:
             if backwards and (n.tags['direction']=='backward'  or n.tags['direction']=='both'):
               print "backward"
               if way_pts[count, 0] > 0:
                 speed_ahead_dist = way_pts[count, 0]
                 print speed_ahead_dist
                 speed_ahead = 5/3.6
+                if n.tags['highway']=='stop':
+                  speed_ahead = 0
                 loop_must_break = True
                 break
             elif not backwards and (n.tags['direction']=='forward' or n.tags['direction']=='both'):
@@ -378,6 +403,8 @@ class Way:
                 speed_ahead_dist = way_pts[count, 0]
                 print speed_ahead_dist
                 speed_ahead = 5/3.6
+                if n.tags['highway']=='stop':
+                  speed_ahead = 0
                 loop_must_break = True
                 break
             try:
@@ -392,9 +419,11 @@ class Way:
                   speed_ahead_dist = way_pts[count, 0]
                   print speed_ahead_dist
                   speed_ahead = 5/3.6
+                  if n.tags['highway']=='stop':
+                    speed_ahead = 0
                   loop_must_break = True
                   break
-            except ValueError:
+            except (KeyError, ValueError):
               pass
           count += 1
         if loop_must_break: break
@@ -450,7 +479,10 @@ class Way:
 
     # Rotate with heading of car
     points_carframe = np.dot(rot, points_carframe[(1, 0, 2), :]).T
-
+    
+    if points_carframe[-1,0] < points_carframe[0,0]:
+      points_carframe = np.flipud(points_carframe)
+      
     return points_carframe
 
   def next_way(self, heading):
@@ -498,6 +530,16 @@ class Way:
             return way
         except (KeyError, IndexError):
           pass
+        try:
+          if ways[0].tags['oneway'] == 'yes':
+            if ways[0].nodes[0].id == node.id and ways[1].nodes[0].id != node.id:
+              way = Way(ways[0], self.query_results)
+              return way
+            elif ways[0].nodes[0].id != node.id and ways[1].nodes[0].id == node.id:
+              way = Way(ways[1], self.query_results)
+              return way
+        except (KeyError, IndexError):
+          pass
       ways = [w for w in ways if (w.nodes[0] == node or w.nodes[-1] == node)]
       if len(ways) == 1:
         way = Way(ways[0], self.query_results)
@@ -516,6 +558,24 @@ class Way:
         way = Way(ways[0], self.query_results)
         #print "only one way found"
         return way
+      if len(ways) == 2:
+        try:
+          if ways[0].tags['junction']=='roundabout' or ways[0].tags['junction']=='circular':
+            #print ("roundabout found")
+            way = Way(ways[0], self.query_results)
+            return way
+        except (KeyError, IndexError):
+          pass
+        try:
+          if ways[0].tags['oneway'] == 'yes':
+            if ways[0].nodes[0].id == node.id and ways[1].nodes[0].id != node.id:
+              way = Way(ways[0], self.query_results)
+              return way
+            elif ways[0].nodes[0].id != node.id and ways[1].nodes[0].id == node.id:
+              way = Way(ways[1], self.query_results)
+              return way
+        except (KeyError, IndexError):
+          pass
       # Filter on number of lanes
       cur_num_lanes = int(self.way.tags['lanes'])
       if len(ways) > 1:
@@ -541,15 +601,20 @@ class Way:
       # Get new points and append to list
       new_pnts = way.points_in_car_frame(lat, lon, heading)
 
+      try:
+        if way.way.tags['junction']=='roundabout' or way.way.tags['junction']=='circular':
+          break
+      except KeyError:
+        pass
       if pnts is None:
         pnts = new_pnts
+        valid = True
       else:
+        new_pnts = np.delete(new_pnts,[0,0,0], axis=0)
         pnts = np.vstack([pnts, new_pnts])
 
       # Check current lookahead distance
       max_dist = np.linalg.norm(pnts[-1, :])
-      if max_dist > lookahead:
-        valid = True
 
       if max_dist > 2 * lookahead:
         break

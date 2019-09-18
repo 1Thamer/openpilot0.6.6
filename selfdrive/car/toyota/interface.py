@@ -94,8 +94,8 @@ class CarInterface(object):
     else:
       ret.gasMaxBP = [0.]
       ret.gasMaxV = [0.5]
-      ret.longitudinalTuning.kpV = [0.5, 0.5, 0.5]  # braking tune from rav4h
-      ret.longitudinalTuning.kiV = [0.020, 0.010]
+      ret.longitudinalTuning.kpV = [0.325, 0.325, 0.325]  # braking tune from rav4h
+      ret.longitudinalTuning.kiV = [0.001, 0.0010]
 
     ret.steerActuatorDelay = 0.12  # Default delay, Prius has larger delay
     if candidate != CAR.PRIUS:
@@ -382,7 +382,10 @@ class CarInterface(object):
     ret.steeringPressed = self.CS.steer_override
 
     # cruise state
-    ret.cruiseState.enabled = self.CS.pcm_acc_active
+    if not self.cruise_enabled_prev:
+      ret.cruiseState.enabled = self.CS.pcm_acc_active
+    else:
+      ret.cruiseState.enabled = bool(self.CS.main_on)
     ret.cruiseState.speed = self.CS.v_cruise_pcm * CV.KPH_TO_MS
     ret.cruiseState.available = bool(self.CS.main_on)
     ret.cruiseState.speedOffset = 0.
@@ -483,11 +486,11 @@ class CarInterface(object):
       events.append(create_event('pcmDisable', [ET.USER_DISABLE]))
 
     # disable on pedals rising edge or when brake is pressed and speed isn't zero
-    if (ret.gasPressed and not self.gas_pressed_prev) or \
-       (ret.brakePressed and (not self.brake_pressed_prev or ret.vEgo > 0.001)):
+    if ((ret.gasPressed and not self.gas_pressed_prev) or \
+       (ret.brakePressed and (not self.brake_pressed_prev or ret.vEgo > 0.001))) and disengage_event:
       events.append(create_event('pedalPressed', [ET.NO_ENTRY, ET.USER_DISABLE]))
 
-    if ret.gasPressed:
+    if ret.gasPressed and disengage_event:
       events.append(create_event('pedalPressed', [ET.PRE_ENABLE]))
 
     ret.events = events

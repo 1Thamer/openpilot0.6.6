@@ -209,9 +209,21 @@ class Planner(object):
 
       if live_map_data.liveMapData.curvatureValid:
         curvature = abs(live_map_data.liveMapData.curvature)
-        a_y_max = 2.975 - v_ego * 0.0375  # ~1.85 @ 75mph, ~2.6 @ 25mph
-        v_curvature = math.sqrt(a_y_max / max(1e-4, curvature)) / 1.3 * _brake_factor
+        #a_y_max = (3.3 - v_ego * 0.125) *  # ~1.85 @ 75mph, ~2.6 @ 25mph
+        #a_y_max = max(a_y_max, 0.95)
+        radius = 1/max(1e-4, curvature)
+        if radius > 500:
+          c=0.7 # 0.7 at 1000m = 95 kph
+        elif radius > 250:
+          c = 2.7-1/250*radius # 1.7 at 264m 76 kph
+        else:
+          c= 3.0 - 13/2500 *radius # 3.0 at 15m 24 kph
+        
+        v_curvature = math.sqrt(c*radius)
         v_curvature = min(NO_CURVATURE_SPEED, v_curvature)
+        #if v_curvature < 10.0:
+        #  v_curvature = NO_CURVATURE_SPEED
+        #v_curvature = max(10.0, v_curvature)
 
     decel_for_turn = bool(v_curvature < min([v_cruise_setpoint, v_speedlimit, v_ego + 1.]))
     v_cruise_setpoint = min([v_cruise_setpoint, v_curvature, v_speedlimit, v_speedlimit_ahead])
