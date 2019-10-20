@@ -249,7 +249,7 @@ def mapsd_thread():
         if curvature_valid:
           # Compute the curvature for each point
           with np.errstate(divide='ignore'):
-            circles = [circle_through_points(*p,False) for p in zip(pnts, pnts[1:], pnts[2:], False)]
+            circles = [circle_through_points(*p,False) for p in zip(pnts, pnts[1:], pnts[2:])]
             circles = np.asarray(circles)
             radii = np.nan_to_num(circles[:, 2])
             radii[radii < 15.] = np.inf
